@@ -15,9 +15,9 @@ import org.springframework.batch.infrastructure.item.Chunk
 import org.springframework.batch.infrastructure.item.ExecutionContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.core.io.ClassPathResource
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
+import java.io.File
 import java.time.LocalDate
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
@@ -262,7 +262,7 @@ class TP4JobTest {
 
     /** Nombre de lignes de donnees du CSV (hors en-tete) : la reference attendue en base. */
     private fun nbLignesCsv(): Int =
-        ClassPathResource("data/ventes.csv").inputStream
+        File(VENTES_CSV)
             .bufferedReader()
             .useLines { lines -> lines.count { it.isNotBlank() } } - 1
 

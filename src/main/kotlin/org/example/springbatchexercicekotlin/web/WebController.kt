@@ -4,11 +4,13 @@ import org.example.springbatchexercicekotlin.batch.TIME_FORMAT
 import org.example.springbatchexercicekotlin.batch.repository.VenteRepository
 import org.springframework.batch.core.BatchStatus
 import org.springframework.batch.core.job.Job
+import org.springframework.batch.core.job.JobExecutionException
 import org.springframework.batch.core.job.parameters.JobParametersBuilder
 import org.springframework.batch.core.launch.JobOperator
 import org.springframework.batch.core.repository.JobRepository
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
+import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -22,7 +24,8 @@ class WebController(
     private val jobOperator: JobOperator,
     private val jobRepository: JobRepository,
     private val venteRepository: VenteRepository,
-    private val helloJob: Job
+    private val helloJob: Job,
+    private val tp5Job: Job
 ) {
 
 
@@ -53,6 +56,12 @@ class WebController(
     fun tp1_2(
         redirect: RedirectAttributes
     ): String {
+
+
+        redirect.addFlashAttribute(
+            "errorMessage",
+            "secondJob → TODO)"
+        )
         return "redirect:/"
     }
 
@@ -62,6 +71,10 @@ class WebController(
         redirect: RedirectAttributes
     ): String {
 
+        redirect.addFlashAttribute(
+            "errorMessage",
+            "tp2Job → TODO)"
+        )
         return "redirect:/"
     }
 
@@ -73,6 +86,12 @@ class WebController(
         redirect: RedirectAttributes
     ): String {
 
+
+
+        redirect.addFlashAttribute(
+            "errorMessage",
+            "tp3Job (runId=$runId) → TODO)"
+        )
         return "redirect:/"
     }
 
@@ -83,12 +102,47 @@ class WebController(
         // contenu du CSV (sinon les lignes s'accumuleraient à chaque relance).
         venteRepository.deleteAll()
 
+        redirect.addFlashAttribute(
+            "errorMessage",
+            "tp4Job → TODO)"
+        )
+
+        return "redirect:/"
+    }
+
+    @PostMapping("/jobs/tp5")
+    fun tp5(redirect: RedirectAttributes): String {
+
+        // TP5 exporte le contenu actuel de la table VENTE vers ventes_tp5.csv.
+        // (Pense a lancer le TP4 avant, pour avoir des donnees a exporter.)
+        val params = JobParametersBuilder()
+            .addLong("timestamp", System.currentTimeMillis())
+            .toJobParameters()
+
+        val execution = jobOperator.start(tp5Job, params)
+
+        redirect.addFlashAttribute(
+            "message",
+            "tp5Job → ${execution.status} (exécution #${execution.id}) → ventes_tp5.csv"
+        )
         return "redirect:/"
     }
 
     /* -------------------------------- */
     // Pour l'UI
     /* -------------------------------- */
+
+    @ExceptionHandler(Exception::class)
+    fun onJobError(e: Exception, redirect: RedirectAttributes): String {
+        e.printStackTrace()
+        if(e is JobExecutionException){
+            redirect.addFlashAttribute("errorMessage", "Impossible de lancer le job : ${e.message}")
+        }
+        else {
+            redirect.addFlashAttribute("errorMessage", "Une erreur est survenue : ${e.message}")
+        }
+        return "redirect:/"
+    }
 
     /** Les dernieres executions, tous jobs confondus, de la plus recente a la plus ancienne. */
     private fun recentExecutions(limit: Int = 12): List<ExecView> =

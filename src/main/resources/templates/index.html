@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spring Batch — Cours &amp; TP</title>
+    <title>Spring Batch : Cours &amp; TP</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -93,6 +93,12 @@
             font-size: 0.88rem;
             margin-bottom: 1.25rem;
         }
+        /* Variante erreur : meme bloc, en rouge */
+        .flash.error {
+            background: rgba(239,68,68,0.12);
+            border-color: rgba(239,68,68,0.4);
+            color: var(--red);
+        }
         /* Panneau "Dernieres executions" */
         .panel-head {
             display: flex;
@@ -169,130 +175,146 @@
     </style>
 </head>
 <body>
-    <header>
-        <div>
-            <h1>Spring Batch — Cours &amp; TP</h1>
-            <p>Déclencheur visuel des jobs. Chaque TP est une carte ci-dessous.</p>
-        </div>
-        <div class="tools">
-            <a href="/h2-console" target="_blank" rel="noopener">🗄️ Console H2</a>
-        </div>
-    </header>
+<header>
+    <div>
+        <h1>Spring Batch : Cours &amp; TP</h1>
+        <p>Déclencheur visuel des jobs. Chaque TP est une carte ci-dessous.</p>
+    </div>
+    <div class="tools">
+        <a href="/h2-console" target="_blank" rel="noopener">🗄️ Console H2</a>
+    </div>
+</header>
 
-    <main>
-        <!-- Message de retour apres lancement d'un job -->
-        <div class="flash" th:if="${message}" th:text="${message}"></div>
+<main>
+    <!-- Message de retour apres lancement d'un job -->
+    <div class="flash" th:if="${message}" th:text="${message}"></div>
+    <!-- Message d'erreur (rouge) -->
+    <div class="flash error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
 
-        <div class="layout">
-            <!-- Colonne gauche : les TP -->
-            <div class="col-left">
-                <!-- TP 1 : HelloWorld Tasklet -->
-                <section class="card">
-                    <h2>TP 1 — HelloWorld (Tasklet)</h2>
-                    <p class="desc">Un job d'une seule étape Tasklet qui affiche « Bonjour depuis un Tasklet ! » dans la console.</p>
-                    <form th:action="@{/jobs/hello}" method="post">
-                        <button type="submit">▶ Lancer le HelloJob</button>
-                    </form>
-                    <form th:action="@{/jobs/second}" method="post" style="margin-left:.5rem">
-                        <button type="submit">▶ Lancer le 2nd Job</button>
-                    </form>
-                </section>
+    <div class="layout">
+        <!-- Colonne gauche : les TP -->
+        <div class="col-left">
+            <!-- TP 1 : HelloWorld Tasklet -->
+            <section class="card">
+                <h2>TP 1 : HelloWorld (Tasklet)</h2>
+                <p class="desc">Un job d'une seule étape Tasklet qui affiche « Bonjour depuis un Tasklet ! » dans la console.</p>
+                <form th:action="@{/jobs/hello}" method="post">
+                    <button type="submit">▶ Lancer le HelloJob</button>
+                </form>
+                <form th:action="@{/jobs/second}" method="post" style="margin-left:.5rem">
+                    <button type="submit">▶ Lancer le 2nd Job</button>
+                </form>
+            </section>
 
-                <!-- TP 2 : passage d'un parametre saisi -->
-                <section class="card">
-                    <h2>TP 2 — Job avec paramètre</h2>
-                    <p class="desc">Le texte saisi est envoyé comme paramètre du job (visible dans BATCH_JOB_EXECUTION_PARAMS).</p>
-                    <form th:action="@{/jobs/tp2}" method="post">
-                        <button type="submit">▶ Lancer le TP2</button>
-                        <input type="text" name="message" placeholder="message…" value="Coucou"
-                               style="margin-left:.5rem;padding:.5rem .7rem;border-radius:8px;
+            <!-- TP 2 : passage d'un parametre saisi -->
+            <section class="card">
+                <h2>TP 2 : Job avec paramètre</h2>
+                <p class="desc">Le texte saisi est envoyé comme paramètre du job (visible dans BATCH_JOB_EXECUTION_PARAMS).</p>
+                <form th:action="@{/jobs/tp2}" method="post">
+                    <button type="submit">▶ Lancer le TP2</button>
+                    <input type="text" name="message" placeholder="message…" value="Coucou"
+                           style="margin-left:.5rem;padding:.5rem .7rem;border-radius:8px;
                                       border:1px solid var(--border);background:#0b1220;color:var(--text)">
-                    </form>
-                </section>
+                </form>
+            </section>
 
-                <!-- TP 3 : multi-steps + restart -->
-                <section class="card">
-                    <h2>TP 3 — Multi-steps &amp; restart</h2>
-                    <p class="desc">
-                        4 steps enchaînés. 1) Coche « échouer au step 3 » et lance : le step 4 ne tourne pas.
-                        2) Relance avec le <strong>même n°</strong> sans cocher : step 1 sauté,
-                        step 2 rejoué (allowStartIfComplete), steps 3 et 4 exécutés.
-                    </p>
-                    <form th:action="@{/jobs/tp3}" method="post">
-                        <button type="submit">▶ Lancer le TP3</button>
-                        <input type="text" name="runId" value="1" placeholder="n° de lancement"
-                               style="margin-left:.5rem;width:8rem;padding:.5rem .7rem;border-radius:8px;
+            <!-- TP 3 : multi-steps + restart -->
+            <section class="card">
+                <h2>TP 3 : Multi-steps &amp; restart</h2>
+                <p class="desc">
+                    4 steps enchaînés. 1) Coche « échouer au step 3 » et lance : le step 4 ne tourne pas.
+                    2) Relance avec le <strong>même n°</strong> sans cocher : step 1 sauté,
+                    step 2 rejoué (allowStartIfComplete), steps 3 et 4 exécutés.
+                </p>
+                <form th:action="@{/jobs/tp3}" method="post">
+                    <button type="submit">▶ Lancer le TP3</button>
+                    <input type="text" name="runId" value="1" placeholder="n° de lancement"
+                           style="margin-left:.5rem;width:8rem;padding:.5rem .7rem;border-radius:8px;
                                       border:1px solid var(--border);background:#0b1220;color:var(--text)">
-                        <label style="margin-left:.5rem;font-size:.85rem;color:var(--muted);cursor:pointer">
-                            <input type="checkbox" name="fail" value="true"> échouer au step 3
-                        </label>
-                    </form>
-                </section>
+                    <label style="margin-left:.5rem;font-size:.85rem;color:var(--muted);cursor:pointer">
+                        <input type="checkbox" name="fail" value="true"> échouer au step 3
+                    </label>
+                </form>
+            </section>
 
-                <!-- TP 4 : import CSV par chunk -->
-                <section class="card">
-                    <h2>TP 4 — Import CSV par chunk</h2>
-                    <p class="desc">
-                        Lit <code>ventes.csv</code> (25 lignes), calcule le TTC (HT × 1,20) et insère
-                        en base par lots de 10 (Reader → Processor → Writer). Observe
-                        <strong>read / write / commit</strong> dans le panneau, et la taille des lots
-                        dans la console serveur.
-                    </p>
-                    <form th:action="@{/jobs/tp4}" method="post">
-                        <button type="submit">▶ Lancer le TP4 (import ventes)</button>
-                    </form>
-                </section>
+            <!-- TP 4 : import CSV par chunk -->
+            <section class="card">
+                <h2>TP 4 : Import CSV par chunk</h2>
+                <p class="desc">
+                    Vide la table Vente, lit <code>ventes.csv</code>, calcule-le TTC (HT × 1,20) et insère
+                    en base par lots de 10 (Reader → Processor → Writer). Observe
+                    <strong>read / write / commit</strong> dans le panneau, et la taille des lots
+                    dans la console serveur.
+                </p>
+                <form th:action="@{/jobs/tp4}" method="post">
+                    <button type="submit">▶ Lancer le TP4 (import ventes)</button>
+                </form>
+            </section>
 
-                <!--
-                    Pour ajouter un TP :
-                    1. Ajoute un @PostMapping("/jobs/monTp") dans WebController
-                    2. Duplique une <section class="card"> ci-dessus
-                    3. Pointe le formulaire vers th:action="@{/jobs/monTp}"
-                -->
-            </div>
+            <!-- TP 5 : export CSV depuis la base (sens inverse du TP4) -->
+            <section class="card">
+                <h2>TP 5 : Export CSV depuis la base</h2>
+                <p class="desc">
+                    Lit la table <code>VENTE</code> triée par montant HT décroissant et génère
+                    <code>ventes_tp5.csv</code> : ligne d'en-tête, une ligne par vente (plus gros
+                    montant en premier), puis un pied de page <strong>« Total : … »</strong>.
+                    Lance d'abord le TP4 pour remplir la table.
+                </p>
+                <form th:action="@{/jobs/tp5}" method="post">
+                    <button type="submit">▶ Lancer le TP5 (export ventes)</button>
+                </form>
+            </section>
 
-            <!-- Colonne droite : panneau des dernieres executions (tables BATCH_*) -->
-            <aside class="col-right">
-                <section class="card">
-                    <div class="panel-head">
-                        <h2>📊 Dernières exécutions</h2>
-                        <a class="refresh" href="/">↻ Rafraîchir</a>
-                    </div>
-
-                    <p class="empty" th:if="${executions?.isEmpty()}">Aucune exécution pour l'instant — lance un job.</p>
-
-                    <div class="exec" th:each="e : ${executions}">
-                        <div class="exec-top">
-                            <span class="job" th:text="${e.jobName}">jobName</span>
-                            <span class="id" th:text="'#' + ${e.id}">#1</span>
-                            <span class="badge ok"  th:if="${e.ok}"     th:text="${e.status}">COMPLETED</span>
-                            <span class="badge ko"  th:if="${e.failed}" th:text="${e.status}">FAILED</span>
-                            <span class="badge run" th:unless="${e.ok or e.failed}" th:text="${e.status}">STARTED</span>
-                        </div>
-                        <div class="exec-meta">
-                            <span th:text="${e.start}">00:00:00</span> ·
-                            durée <span th:text="${e.duration}">— ms</span> ·
-                            exit <span th:text="${e.exitCode}">COMPLETED</span>
-                        </div>
-                        <div class="exec-params" th:if="${!e.params.isEmpty()}" th:text="${e.params}">params</div>
-
-                        <table class="steps" th:if="${!e.steps.isEmpty()}">
-                            <tr><th>step</th><th>statut</th><th>read</th><th>write</th><th>commit</th><th>rollback</th></tr>
-                            <tr th:each="s : ${e.steps}">
-                                <td th:text="${s.name}">step</td>
-                                <td th:text="${s.status}">COMPLETED</td>
-                                <td th:text="${s.read}">0</td>
-                                <td th:text="${s.write}">0</td>
-                                <td th:text="${s.commit}">0</td>
-                                <td th:text="${s.rollback}">0</td>
-                            </tr>
-                        </table>
-
-                        <div class="exit-msg" th:if="${e.failed and !e.exitMessage.isEmpty()}" th:text="${e.exitMessage}">stacktrace</div>
-                    </div>
-                </section>
-            </aside>
+            <!--
+                Pour ajouter un TP :
+                1. Ajoute un @PostMapping("/jobs/monTp") dans WebController
+                2. Duplique une <section class="card"> ci-dessus
+                3. Pointe le formulaire vers th:action="@{/jobs/monTp}"
+            -->
         </div>
-    </main>
+
+        <!-- Colonne droite : panneau des dernieres executions (tables BATCH_*) -->
+        <aside class="col-right">
+            <section class="card">
+                <div class="panel-head">
+                    <h2>📊 Dernières exécutions</h2>
+                    <a class="refresh" href="/">↻ Rafraîchir</a>
+                </div>
+
+                <p class="empty" th:if="${executions?.isEmpty()}">Aucune exécution pour l'instant : lance un job.</p>
+
+                <div class="exec" th:each="e : ${executions}">
+                    <div class="exec-top">
+                        <span class="job" th:text="${e.jobName}">jobName</span>
+                        <span class="id" th:text="'#' + ${e.id}">#1</span>
+                        <span class="badge ok"  th:if="${e.ok}"     th:text="${e.status}">COMPLETED</span>
+                        <span class="badge ko"  th:if="${e.failed}" th:text="${e.status}">FAILED</span>
+                        <span class="badge run" th:unless="${e.ok or e.failed}" th:text="${e.status}">STARTED</span>
+                    </div>
+                    <div class="exec-meta">
+                        <span th:text="${e.start}">00:00:00</span> ·
+                        durée <span th:text="${e.duration}"> ms</span> ·
+                        exit <span th:text="${e.exitCode}">COMPLETED</span>
+                    </div>
+                    <div class="exec-params" th:if="${!e.params.isEmpty()}" th:text="${e.params}">params</div>
+
+                    <table class="steps" th:if="${!e.steps.isEmpty()}">
+                        <tr><th>step</th><th>statut</th><th>read</th><th>write</th><th>commit</th><th>rollback</th></tr>
+                        <tr th:each="s : ${e.steps}">
+                            <td th:text="${s.name}">step</td>
+                            <td th:text="${s.status}">COMPLETED</td>
+                            <td th:text="${s.read}">0</td>
+                            <td th:text="${s.write}">0</td>
+                            <td th:text="${s.commit}">0</td>
+                            <td th:text="${s.rollback}">0</td>
+                        </tr>
+                    </table>
+
+                    <div class="exit-msg" th:if="${e.failed and !e.exitMessage.isEmpty()}" th:text="${e.exitMessage}">stacktrace</div>
+                </div>
+            </section>
+        </aside>
+    </div>
+</main>
 </body>
 </html>

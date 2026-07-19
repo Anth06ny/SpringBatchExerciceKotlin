@@ -1,8 +1,7 @@
 package org.example.springbatchexercicekotlin.batch.config
 
 import jakarta.persistence.EntityManagerFactory
-import jdk.internal.joptsimple.internal.Messages.message
-import org.example.springbatchexercicekotlin.batch.CHUNK_SIZE
+import org.example.springbatchexercicekotlin.batch.VENTES_CSV
 import org.example.springbatchexercicekotlin.batch.model.VenteCsvDTO
 import org.example.springbatchexercicekotlin.batch.model.VenteEntity
 import org.springframework.batch.core.job.Job
@@ -13,19 +12,13 @@ import org.springframework.batch.core.step.builder.StepBuilder
 import org.springframework.batch.core.step.tasklet.Tasklet
 import org.springframework.batch.infrastructure.item.ItemProcessor
 import org.springframework.batch.infrastructure.item.ItemWriter
-import org.springframework.batch.infrastructure.item.database.JpaItemWriter
-import org.springframework.batch.infrastructure.item.database.builder.JpaItemWriterBuilder
 import org.springframework.batch.infrastructure.item.file.FlatFileItemReader
 import org.springframework.batch.infrastructure.item.file.builder.FlatFileItemReaderBuilder
 import org.springframework.batch.infrastructure.repeat.RepeatStatus
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.io.ClassPathResource
+import org.springframework.core.io.FileSystemResource
 import org.springframework.transaction.PlatformTransactionManager
-import java.math.BigDecimal
-import java.math.RoundingMode
-import java.time.LocalDate
-import kotlin.jvm.java
 
 
 @Configuration
@@ -39,7 +32,7 @@ class TP4_JobConfig {
     fun venteReader(): FlatFileItemReader<VenteCsvDTO> =
         FlatFileItemReaderBuilder<VenteCsvDTO>()
             .name("venteReader")
-            .resource(ClassPathResource("data/ventes.csv"))
+            .resource(FileSystemResource(VENTES_CSV))
             .linesToSkip(1) // ligne d'en-tete
             .delimited()
             .delimiter(";")
@@ -52,7 +45,7 @@ class TP4_JobConfig {
      * le TTC. Ne retourne JAMAIS null (aucun filtrage).
      */
     @Bean
-    fun venteProcessor() =ItemProcessor<VenteCsvDTO, VenteEntity> { null!! }
+    fun venteProcessor() = ItemProcessor<VenteCsvDTO, VenteEntity> { null!! }
 
     /**
      * Writer : persiste le lot en base H2 via JpaItemWriter.
@@ -70,19 +63,17 @@ class TP4_JobConfig {
     @Bean
     fun tp4Step(
         jobRepository: JobRepository,
-        transactionManager: PlatformTransactionManager
+        transactionManager: PlatformTransactionManager,
+        helloTask : Tasklet
     ): Step =
         StepBuilder("tp4Step", jobRepository)
-            .tasklet(Tasklet { contribution, chunkContext ->
-                println("ChangeMe in chunk step")
-                RepeatStatus.FINISHED
-            }, transactionManager)
+            .tasklet(helloTask, transactionManager)
             .build()
 
     @Bean
     fun tp4Job(jobRepository: JobRepository): Job =
         JobBuilder("tp4Job", jobRepository)
-            .start {  }
+            .start { }
             .build()
 }
 
