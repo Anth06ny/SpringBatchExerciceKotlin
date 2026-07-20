@@ -1,6 +1,8 @@
 package org.example.springbatchexercicekotlin.web
 
 import org.example.springbatchexercicekotlin.batch.TIME_FORMAT
+import org.example.springbatchexercicekotlin.batch.VENTES_CSV
+import org.example.springbatchexercicekotlin.batch.config.cheminRapportTp6
 import org.example.springbatchexercicekotlin.batch.repository.VenteRepository
 import org.springframework.batch.core.BatchStatus
 import org.springframework.batch.core.job.Job
@@ -16,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import java.time.Duration
-import java.time.format.DateTimeFormatter
 
 
 @Controller
@@ -25,7 +26,9 @@ class WebController(
     private val jobRepository: JobRepository,
     private val venteRepository: VenteRepository,
     private val helloJob: Job,
-    private val tp5Job: Job
+    private val tp5Job: Job,
+    private val tp6Job: Job
+
 ) {
 
 
@@ -124,6 +127,37 @@ class WebController(
         redirect.addFlashAttribute(
             "message",
             "tp5Job → ${execution.status} (exécution #${execution.id}) → ventes_tp5.csv"
+        )
+        return "redirect:/"
+    }
+
+    @PostMapping("/jobs/tp6")
+    fun tp6(
+        @RequestParam(defaultValue = VENTES_CSV) fichierSource: String,
+        @RequestParam(defaultValue = "CSV") format: String,
+        // ATTENTION : une case NON cochee n'envoie RIEN dans un POST HTML.
+        // Sans defaultValue, le parametre serait absent et la requete echouerait.
+        @RequestParam(defaultValue = "false") totalTtc: Boolean,
+        @RequestParam(defaultValue = "0") montantMini: Double,
+        redirect: RedirectAttributes
+    ): String {
+
+        // JobParameters n'accepte que String / Long / Double / Date & co.
+        val params = JobParametersBuilder()
+            .addLong("timestamp", System.currentTimeMillis())
+            .toJobParameters()
+
+        val execution = jobOperator.start(tp6Job, params)
+
+        // Bilan pour l'IHM : les compteurs du step suffisent, pas besoin d'un step dedie.
+        // filterCount = lignes ecartees par le processor (celles sous montantMini).
+        val step = execution.stepExecutions.first { it.stepName == "tp6Step" }
+        val bilan = "${step.writeCount} ligne(s) exportée(s) sur ${step.readCount} lue(s)" +
+                " (${step.filterCount} filtrée(s)) → ${cheminRapportTp6(format)}"
+
+        redirect.addFlashAttribute(
+            "message",
+            "tp6Job → ${execution.status} (exécution #${execution.id}) — $bilan"
         )
         return "redirect:/"
     }

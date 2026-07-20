@@ -256,12 +256,51 @@
                 <h2>TP 5 : Export CSV depuis la base</h2>
                 <p class="desc">
                     Lit la table <code>VENTE</code> triée par montant HT décroissant et génère
-                    <code>ventes_tp5.csv</code> : ligne d'en-tête, une ligne par vente (plus gros
+                    <code>tp5_ventes.csv</code> : ligne d'en-tête, une ligne par vente (plus gros
                     montant en premier), puis un pied de page <strong>« Total : … »</strong>.
                     Lance d'abord le TP4 pour remplir la table.
                 </p>
                 <form th:action="@{/jobs/tp5}" method="post">
                     <button type="submit">▶ Lancer le TP5 (export ventes)</button>
+                </form>
+            </section>
+
+            <!-- TP 6 : passage de parametres (late binding) -->
+            <section class="card">
+                <h2>TP 6 : Paramètres &amp; late binding</h2>
+                <p class="desc">
+                    Les 4 réglages ci-dessous sont envoyés en <strong>JobParameters</strong> et lus
+                    à des endroits différents : le <em>fichier</em> par le <strong>reader</strong>,
+                    le <em>montant mini</em> et <em>HT/TTC</em> par le <strong>processor</strong>
+                    (montant mini = lignes filtrées), le <em>format</em> par le
+                    <strong>writer</strong>. Sortie dans <code>tp6_ventes_sortie.csv</code>
+                    ou <code>tp6_ventes_sortie.json</code>.
+                </p>
+                <form th:action="@{/jobs/tp6}" method="post">
+                    <button type="submit">▶ Lancer le TP6 (rapport paramétré)</button>
+
+                    <select name="fichierSource"
+                            style="margin-left:.5rem;padding:.5rem .7rem;border-radius:8px;
+                                       border:1px solid var(--border);background:#0b1220;color:var(--text)">
+                        <option value="data/ventes.csv">ventes.csv (25 lignes)</option>
+                        <option value="data/tp6_ventes.csv">tp6_ventes.csv (12 lignes)</option>
+                    </select>
+
+                    <select name="format"
+                            style="margin-left:.5rem;padding:.5rem .7rem;border-radius:8px;
+                                       border:1px solid var(--border);background:#0b1220;color:var(--text)">
+                        <option value="CSV">Sortie CSV</option>
+                        <option value="JSON">Sortie JSON</option>
+                    </select>
+
+                    <input type="number" name="montantMini" value="0" min="0" step="10"
+                           title="Ne garder que les ventes dont le montant HT atteint ce seuil"
+                           style="margin-left:.5rem;width:7rem;padding:.5rem .7rem;border-radius:8px;
+                                      border:1px solid var(--border);background:#0b1220;color:var(--text)">
+
+                    <label style="margin-left:.5rem;font-size:.85rem;color:var(--muted);cursor:pointer">
+                        <input type="checkbox" name="totalTtc" value="true"> montants en TTC
+                    </label>
                 </form>
             </section>
 
