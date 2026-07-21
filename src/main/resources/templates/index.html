@@ -304,6 +304,40 @@
                 </form>
             </section>
 
+            <!-- TP 7 : tolerance aux fautes (skip / retry) -->
+            <section class="card">
+                <h2>TP 7 : Skip &amp; retry</h2>
+                <p class="desc">
+                    Import CSV → table <code>VENTE</code> (table vidée à chaque clic), mais les
+                    fichiers contiennent des lignes <strong>corrompues</strong> : illisibles
+                    (→ <strong>skip lecture</strong>) ou à montant négatif (→ <strong>skip
+                    traitement</strong>), limite de 6 rejets. Les rejets sont tracés dans
+                    <code>tp7_rejets.csv</code>. La case <em>risque</em> simule une panne
+                    passagère 1 appel sur 10 (→ <strong>retry</strong>). Le <em>runId</em>
+                    identifie l'instance : le laisser vide = nouvelle instance à chaque clic,
+                    ressaisir le même = <strong>restart</strong>.
+                </p>
+                <form th:action="@{/jobs/tp7}" method="post">
+                    <button type="submit">▶ Lancer le TP7 (import tolérant)</button>
+
+                    <select name="fichierSource"
+                            style="margin-left:.5rem;padding:.5rem .7rem;border-radius:8px;
+                                   border:1px solid var(--border);background:#0b1220;color:var(--text)">
+                        <option value="data/tp7_ventes_5lcorrompues.csv">tp7_ventes_5lcorrompues.csv (80 l., 5 corrompues)</option>
+                        <option value="data/tp7_ventes_10lcorrompues.csv">tp7_ventes_10lcorrompues.csv (80 l., 10 corrompues)</option>
+                    </select>
+
+                    <input type="text" name="runId" value="" placeholder="runId (vide = auto)"
+                           title="Meme runId = meme JobInstance : permet le restart apres echec"
+                           style="margin-left:.5rem;width:10rem;padding:.5rem .7rem;border-radius:8px;
+                                  border:1px solid var(--border);background:#0b1220;color:var(--text)">
+
+                    <label style="margin-left:.5rem;font-size:.85rem;color:var(--muted);cursor:pointer">
+                        <input type="checkbox" name="risque" value="true"> risque de panne (1/10)
+                    </label>
+                </form>
+            </section>
+
             <!--
                 Pour ajouter un TP :
                 1. Ajoute un @PostMapping("/jobs/monTp") dans WebController
@@ -338,12 +372,13 @@
                     <div class="exec-params" th:if="${!e.params.isEmpty()}" th:text="${e.params}">params</div>
 
                     <table class="steps" th:if="${!e.steps.isEmpty()}">
-                        <tr><th>step</th><th>statut</th><th>read</th><th>write</th><th>commit</th><th>rollback</th></tr>
+                        <tr><th>step</th><th>statut</th><th>read</th><th>write</th><th>skip</th><th>commit</th><th>rollback</th></tr>
                         <tr th:each="s : ${e.steps}">
                             <td th:text="${s.name}">step</td>
                             <td th:text="${s.status}">COMPLETED</td>
                             <td th:text="${s.read}">0</td>
                             <td th:text="${s.write}">0</td>
+                            <td th:text="${s.skip}">0</td>
                             <td th:text="${s.commit}">0</td>
                             <td th:text="${s.rollback}">0</td>
                         </tr>

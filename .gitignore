@@ -49,3 +49,6 @@ data/tp5_ventes.csv
 ### TP6 : rapport genere (data/tp6_ventes.csv est une ENTREE, il reste versionne) ###
 data/tp6_ventes_sortie.csv
 data/tp6_ventes_sortie.json
+
+### TP7 : fichier de rejets genere (les 2 CSV corrompus sont des ENTREES versionnees) ###
+data/tp7_rejets.csv

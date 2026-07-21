@@ -1,6 +1,8 @@
 package org.example.springbatchexercicekotlin.web
 
 import org.example.springbatchexercicekotlin.batch.TIME_FORMAT
+import org.example.springbatchexercicekotlin.batch.TP7_REJETS_CSV
+import org.example.springbatchexercicekotlin.batch.TP7_VENTES_5L_CSV
 import org.example.springbatchexercicekotlin.batch.VENTES_CSV
 import org.example.springbatchexercicekotlin.batch.config.cheminRapportTp6
 import org.example.springbatchexercicekotlin.batch.repository.VenteRepository
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import java.time.Duration
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 @Controller
@@ -27,7 +31,8 @@ class WebController(
     private val venteRepository: VenteRepository,
     private val helloJob: Job,
     private val tp5Job: Job,
-    private val tp6Job: Job
+    private val tp6Job: Job,
+    private val tp7Job: Job
 
 ) {
 
@@ -162,6 +167,50 @@ class WebController(
         return "redirect:/"
     }
 
+    @PostMapping("/jobs/tp7")
+    fun tp7(
+        @RequestParam(defaultValue = TP7_VENTES_5L_CSV) fichierSource: String,
+        @RequestParam(defaultValue = "") runId: String,
+        @RequestParam(defaultValue = "false") risque: Boolean,
+        redirect: RedirectAttributes
+    ): String {
+
+        // Comme au TP4 : chaque clic repart d'une table VENTE vide, le contenu
+        // reflete donc uniquement le fichier choisi.
+        venteRepository.deleteAll()
+
+        // runId vide -> on en genere un depuis la date : chaque clic est alors une
+        // nouvelle JobInstance. Saisir un runId a la main permet de REJOUER la meme
+        // instance (restart apres echec, cf. TP3).
+        val id = runId.ifBlank {
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))
+        }
+
+        val params = JobParametersBuilder()
+            .addString("runId", id)
+            // Non-identifiants : on peut changer de fichier ou cocher le risque
+            // entre deux tentatives sans changer d'instance.
+            .addString("fichierSource", fichierSource, false)
+            .addString("risque", risque.toString(), false)
+            .toJobParameters()
+
+        val execution = jobOperator.start(tp7Job, params)
+
+        val step = execution.stepExecutions.first { it.stepName == "tp7Step" }
+        val bilan = "lues=${step.readCount}, écrites=${step.writeCount}, " +
+                "rejets lecture=${step.readSkipCount}, rejets traitement=${step.processSkipCount}, " +
+                "rollbacks=${step.rollbackCount} → rejets dans $TP7_REJETS_CSV"
+
+        val texte = "tp7Job (runId=$id) → ${execution.status} (exécution #${execution.id}) — $bilan"
+        if (execution.status == BatchStatus.COMPLETED) {
+            redirect.addFlashAttribute("message", texte)
+        } else {
+            // Un TP sur les echecs : un job FAILED s'affiche dans le bandeau rouge.
+            redirect.addFlashAttribute("errorMessage", texte)
+        }
+        return "redirect:/"
+    }
+
     /* -------------------------------- */
     // Pour l'UI
     /* -------------------------------- */
@@ -208,7 +257,8 @@ class WebController(
                             read = s.readCount,
                             write = s.writeCount,
                             commit = s.commitCount,
-                            rollback = s.rollbackCount
+                            rollback = s.rollbackCount,
+                            skip = s.skipCount
                         )
                     }
                 )
@@ -237,5 +287,7 @@ data class StepView(
     val read: Long,
     val write: Long,
     val commit: Long,
-    val rollback: Long
+    val rollback: Long,
+    // skips = lecture + traitement + ecriture (TP7)
+    val skip: Long
 )
