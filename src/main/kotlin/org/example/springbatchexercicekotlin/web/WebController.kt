@@ -205,8 +205,8 @@ class WebController(
         if (execution.status == BatchStatus.COMPLETED) {
             redirect.addFlashAttribute("message", texte)
         } else {
-            // Un TP sur les echecs : un job FAILED s'affiche dans le bandeau rouge.
-            redirect.addFlashAttribute("errorMessage", texte)
+            val cause = execution.allFailureExceptions.firstOrNull()?.cause?.cause ?: "-"
+            redirect.addFlashAttribute("errorMessage", texte + "\n" +  cause)
         }
         return "redirect:/"
     }

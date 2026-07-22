@@ -16,6 +16,7 @@ import org.springframework.batch.infrastructure.item.ItemStreamReader
 import org.springframework.batch.infrastructure.item.ItemWriter
 import org.springframework.batch.infrastructure.item.database.JpaItemWriter
 import org.springframework.batch.infrastructure.item.database.builder.JpaItemWriterBuilder
+import org.springframework.batch.infrastructure.item.file.FlatFileParseException
 import org.springframework.batch.infrastructure.item.file.builder.FlatFileItemReaderBuilder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -63,6 +64,9 @@ class TP7_JobConfig {
                 if (appel % 10 == 0) {
                     throw QueryTimeoutException("Panne simulée (appel n°$appel)")
                 }
+            }
+            if( csv.montantHt < 0) {
+                throw Exception("Montant invalide : ${csv.montantHt}")
             }
             VenteEntity(
                 dateVente = LocalDate.parse(csv.date),
@@ -112,6 +116,10 @@ class TP7_JobConfig {
             .reader(tp7Reader)
             .processor(tp7Processor)
             .writer(tp7Writer)
+            .faultTolerant()
+            .skip(FlatFileParseException::class.java)
+            .skip(NumberFormatException::class.java)
+            .skipLimit(6)
             .transactionManager(transactionManager)
             .build()
 
