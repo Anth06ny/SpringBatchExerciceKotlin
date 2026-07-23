@@ -95,7 +95,6 @@ class WebController(
     ): String {
 
 
-
         redirect.addFlashAttribute(
             "errorMessage",
             "tp3Job (runId=$runId) → TODO)"
@@ -175,13 +174,12 @@ class WebController(
         redirect: RedirectAttributes
     ): String {
 
-        // Comme au TP4 : chaque clic repart d'une table VENTE vide, le contenu
-        // reflete donc uniquement le fichier choisi.
+        // chaque clic repart d'une table VENTE vide, le contenu
         venteRepository.deleteAll()
 
         // runId vide -> on en genere un depuis la date : chaque clic est alors une
         // nouvelle JobInstance. Saisir un runId a la main permet de REJOUER la meme
-        // instance (restart apres echec, cf. TP3).
+        // instance
         val id = runId.ifBlank {
             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))
         }
@@ -204,9 +202,9 @@ class WebController(
         val texte = "tp7Job (runId=$id) → ${execution.status} (exécution #${execution.id}) — $bilan"
         if (execution.status == BatchStatus.COMPLETED) {
             redirect.addFlashAttribute("message", texte)
-        } else {
-            val cause = execution.allFailureExceptions.firstOrNull()?.cause?.cause ?: "-"
-            redirect.addFlashAttribute("errorMessage", texte + "\n" +  cause)
+        }
+        else {
+            redirect.addFlashAttribute("errorMessage", texte)
         }
         return "redirect:/"
     }
@@ -218,7 +216,7 @@ class WebController(
     @ExceptionHandler(Exception::class)
     fun onJobError(e: Exception, redirect: RedirectAttributes): String {
         e.printStackTrace()
-        if(e is JobExecutionException){
+        if (e is JobExecutionException) {
             redirect.addFlashAttribute("errorMessage", "Impossible de lancer le job : ${e.message}")
         }
         else {

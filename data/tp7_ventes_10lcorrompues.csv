@@ -1,0 +1,81 @@
+date;idBoutique;produit;montantHt
+2026-02-02;B01;Clavier mecanique;79.90
+2026-02-02;B02;Souris sans fil;29.50
+2026-02-02;B03;Ecran 27 pouces;219.00
+2026-02-02;B04;Cable HDMI 2m;9.90
+2026-02-03;B01;Casque audio;59.99
+2026-02-03;B02;Webcam HD;45.00
+2026-02-03;B03;Hub USB-C;24.90
+2026-02-03;B04;Disque SSD 1To;99.00
+2026-02-04;B01;Tapis de souris XL;14.50
+2026-02-04;B02;Chargeur 65W;39.90
+2026-02-04;B03;Support ecran;32.00
+2026-02-04;B04;Micro USB studio;89.00
+2026-02-05;B01;Batterie externe;27.50
+2026-02-05;B02;Station accueil;149.00
+2026-02-05;B03;Enceinte bluetooth;54.90
+2026-02-05;B04;Cle USB 128Go;19.90
+2026-02-06;B01;Lampe de bureau LED;34.00
+2026-02-06;B02;Repose-poignets;12.90
+2026-02-06;B03;Adaptateur DisplayPort;16.50
+2026-02-06;B04;Imprimante laser;189.00
+2026-02-07;B01;Clavier mecanique;84.90
+2026-02-07;B02;Souris sans fil;34.50
+2026-02-07;B03;Ecran 27 pouces;224.00
+2026-02-07;B04;Cable HDMI 2m;14.90
+2026-02-08;B01;Casque audio;64.99
+2026-02-08;B02;Webcam HD;50.00
+2026-02-08;B03;Hub USB-C;29.90
+2026-02-08;B04;Disque SSD 1To;104.00
+2026-02-09;B01;Tapis de souris XL;19.50
+2026-02-09;B02;Chargeur 65W;44.90
+2026-02-09;B03;Support ecran;37.00
+2026-02-09;B04;Micro USB studio;94.00
+2026-02-10;B01;Batterie externe;32.50
+2026-02-10;B02;Station accueil;154.00
+2026-02-10;B03;Enceinte bluetooth;59.90
+2026-02-10;B04;Cle USB 128Go;24.90
+2026-02-11;B01;Lampe de bureau LED;39.00
+2026-02-11;B02;Repose-poignets;17.90
+2026-02-11;B03;Adaptateur DisplayPort;21.50
+2026-02-11;B04;Imprimante laser;194.00
+2026-02-12;B01;Clavier mecanique;89.90
+2026-02-12;B02;Souris sans fil;39.50
+2026-02-12;B03;Ecran 27 pouces;229.00
+2026-02-12;B04;Cable HDMI 2m;19.90
+2026-02-13;B01;Casque audio;69.99
+2026-02-13;B02;Webcam HD;55.00
+2026-02-13;B03;Hub USB-C;34.90
+2026-02-13;B04;Disque SSD 1To;109.00
+2026-02-14;B01;Tapis de souris XL;24.50
+2026-02-14;B02;Chargeur 65W;49.90
+2026-02-14;B03;Support ecran;42.00
+2026-02-14;B04;Produit mystere;quarante euros
+2026-02-15;B01;Batterie externe;37.50
+2026-02-15;B02;Station accueil;159.00
+2026-02-15;B03;Ecran incurve
+2026-02-15;B04;Cle USB 128Go;29.90
+2026-02-16;B01;Retour client;-20.00
+2026-02-16;B02;Repose-poignets;22.90
+2026-02-16;B03;Produit mystere;abc
+2026-02-16;B04;Imprimante laser;199.00
+2026-02-17;B01;Clavier mecanique;94.90
+2026-02-17;B02;Souris sans fil;44.50
+2026-02-17;B03;Ecran incurve
+2026-02-17;B04;Cable HDMI 2m;24.90
+2026-02-18;B01;Retour client;-5.99
+2026-02-18;B02;Webcam HD;60.00
+2026-02-18;B03;Produit mystere;12,50
+2026-02-18;B04;Disque SSD 1To;114.00
+2026-02-19;B01;Tapis de souris XL;29.50
+2026-02-19;B02;Chargeur 65W;54.90
+2026-02-19;B03;Ecran incurve
+2026-02-19;B04;Micro USB studio;104.00
+2026-02-20;B01;Batterie externe;42.50
+2026-02-20;B02;Retour client;-120.00
+2026-02-20;B03;Enceinte bluetooth;69.90
+2026-02-20;B04;Produit mystere;n/a
+2026-02-21;B01;Lampe de bureau LED;49.00
+2026-02-21;B02;Repose-poignets;27.90
+2026-02-21;B03;Adaptateur DisplayPort;31.50
+2026-02-21;B04;Imprimante laser;204.00

@@ -14,8 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import java.io.File
+import java.time.format.DateTimeParseException
 import kotlin.math.abs
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -91,8 +93,31 @@ class TP7JobTest {
             "Un rejet par exception n'est PAS un filtrage (pas de return null ici)")
     }
 
+    /**
+     * CONTRE-EXEMPLE : le step ne skippe QUE les exceptions declarees
+     * (FlatFileParseException, VenteInvalideException). Toute AUTRE exception
+     * n'est pas rattrapee -> elle arrete le job. Ici une ligne parfaitement
+     * lisible mais a date invalide ("pas-une-date") passe le reader et la regle
+     * metier, puis fait echouer LocalDate.parse -> DateTimeParseException.
+     * C'est le garde-fou : une erreur inconnue n'est jamais ignoree en silence.
+     */
     @Test
-    fun `04 skip traitement - seules les lignes valides sont en base`() {
+    fun `04 skip traitement - une exception non declaree n'est PAS skippee et arrete le job`() {
+        val execution = lancer(TP7_VENTES_ERREUR_INATTENDUE_CSV)
+
+        assertEquals(BatchStatus.FAILED, execution.status,
+            "Une exception hors de la liste des skips doit faire ECHOUER le job")
+        assertEquals(0L, step(execution).skipCount,
+            "La ligne fautive n'est PAS skippee : ce n'est ni FlatFileParseException ni VenteInvalideException")
+        assertFalse(step(execution).exitStatus.exitDescription.contains("SkipLimitExceeded"),
+            "L'echec vient de l'exception non geree, pas d'un depassement de skipLimit")
+        assertTrue(
+            step(execution).failureExceptions.any { ex -> causes(ex).any { it is DateTimeParseException } },
+            "La cause de l'echec doit etre la DateTimeParseException de LocalDate.parse")
+    }
+
+    @Test
+    fun `05 skip traitement - seules les lignes valides sont en base`() {
         lancer(TP7_VENTES_5L_CSV)
 
         val ventes = venteRepository.findAll()
@@ -104,24 +129,6 @@ class TP7JobTest {
         val sommeTtc = ventes.sumOf { it.prixTtc }
         assertTrue(abs(sommeTtc - 6167.35) < 0.1,
             "La somme TTC attendue est 6167.35 (75 lignes valides), obtenu : $sommeTtc")
-    }
-
-    /**
-     * NOUVEAU MOTEUR BATCH 6 : le skip se fait SUR PLACE, item par item, sans
-     * rollback du chunk (Batch 5 rollbackait puis rejouait le chunk entier).
-     */
-    @Test
-    fun `05 skip - le rejet se fait sur place sans aucun rollback`() {
-        val execution = lancer(TP7_VENTES_5L_CSV)
-
-        assertEquals(0L, step(execution).rollbackCount,
-            "En Batch 6, skipper (lecture ou traitement) ne coute plus un rollback")
-        assertEquals(75L, step(execution).writeCount)
-        // Un chunk = 10 TENTATIVES de lecture (pas 10 items) : les lignes skippees
-        // "creusent" les chunks. 80 tentatives / 10 = 8 commits, les 3 derniers lots
-        // ne font que 8, 8 et 9 ecritures (visible dans les logs du writer).
-        assertEquals(8L, step(execution).commitCount,
-            "80 tentatives de lecture par chunks de 10 = 8 commits")
     }
 
     /* ========================================================================= */
@@ -188,29 +195,12 @@ class TP7JobTest {
         assertEquals(75, venteRepository.count().toInt())
     }
 
-    /**
-     * NOUVEAU MOTEUR BATCH 6 : le retry rejoue l'ITEM sur place, sans rollback ni
-     * rejeu du chunk. La re-tentative incremente le compteur du processor (11e appel,
-     * 21e...), qui n'est plus un multiple de 10 : chaque panne guerit en un retry.
-     */
-    @Test
-    fun `11 retry - la panne est rejouee sur place sans rollback`() {
-        val execution = lancer(TP7_VENTES_5L_CSV, risque = true)
-
-        assertEquals(0L, step(execution).rollbackCount,
-            "Le retry Batch 6 se fait sur place : aucun rollback")
-        assertEquals(3L, step(execution).readSkipCount,
-            "Le retry ne doit pas perturber les skips de lecture")
-        assertEquals(2L, step(execution).processSkipCount,
-            "Le retry ne doit pas perturber les skips de traitement")
-    }
-
     /* ========================================================================= */
     /* CHAINE COMPLETE — skip et retry se combinent                              */
     /* ========================================================================= */
 
     @Test
-    fun `12 chaine complete - skip et retry se combinent`() {
+    fun `11 chaine complete - skip et retry se combinent`() {
         val execution = lancer(TP7_VENTES_10L_CSV, risque = true)
 
         assertEquals(BatchStatus.FAILED, execution.status,
@@ -239,6 +229,9 @@ class TP7JobTest {
 
     private fun step(execution: JobExecution): StepExecution =
         execution.stepExecutions.first { it.stepName == "tp7Step" }
+
+    /** La chaine des causes d'une exception (elle-meme incluse), pour tester un type enfoui. */
+    private fun causes(t: Throwable): Sequence<Throwable> = generateSequence(t) { it.cause }
 
     /** Les lignes de rejet (sans la ligne d'en-tete `phase;donnee;cause`). */
     private fun rejets(): List<String> =

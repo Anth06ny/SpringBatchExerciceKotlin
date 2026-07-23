@@ -9,6 +9,8 @@ val TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
 
 const val VENTES_CSV = "data/ventes.csv"
 const val TP5_OUTPUT = "data/tp5_ventes.csv"
+
+// TP6 : 2e fichier source propose dans le menu deroulant de l'IHM (12 lignes).
 const val TP6_VENTES_CSV = "data/tp6_ventes.csv"
 
 // TP7 : 80 ventes dont 5 corrompues (3 illisibles + 2 montants negatifs).
@@ -19,3 +21,8 @@ const val TP7_VENTES_10L_CSV = "data/tp7_ventes_10lcorrompues.csv"
 
 // TP7 : les lignes rejetees et leur cause, ECRASE a chaque execution du step.
 const val TP7_REJETS_CSV = "data/tp7_rejets.csv"
+
+// TP7 : 4 lignes valides + 1 ligne PARFAITEMENT lisible mais a date invalide
+// ("pas-une-date"). Elle passe le reader et la regle metier, mais fait echouer
+// LocalDate.parse -> DateTimeParseException, une exception NI skippee NI retry.
+const val TP7_VENTES_ERREUR_INATTENDUE_CSV = "data/tp7_ventes_erreur_inattendue.csv"

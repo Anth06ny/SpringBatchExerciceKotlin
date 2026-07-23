@@ -16,7 +16,6 @@ import org.springframework.batch.infrastructure.item.ItemStreamReader
 import org.springframework.batch.infrastructure.item.ItemWriter
 import org.springframework.batch.infrastructure.item.database.JpaItemWriter
 import org.springframework.batch.infrastructure.item.database.builder.JpaItemWriterBuilder
-import org.springframework.batch.infrastructure.item.file.FlatFileParseException
 import org.springframework.batch.infrastructure.item.file.builder.FlatFileItemReaderBuilder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -28,10 +27,6 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @Configuration
 class TP7_JobConfig {
-
-    /* ------------------------------------------------------------------ */
-    /* Reader : comme au TP4, mais le fichier vient d'un JobParameter      */
-    /* ------------------------------------------------------------------ */
 
     @Bean
     @StepScope
@@ -65,9 +60,7 @@ class TP7_JobConfig {
                     throw QueryTimeoutException("Panne simulée (appel n°$appel)")
                 }
             }
-            if( csv.montantHt < 0) {
-                throw Exception("Montant invalide : ${csv.montantHt}")
-            }
+
             VenteEntity(
                 dateVente = LocalDate.parse(csv.date),
                 boutique = csv.idBoutique,
@@ -95,9 +88,6 @@ class TP7_JobConfig {
         }
     }
 
-    /* ------------------------------------------------------------------ */
-    /* Listener : trace chaque rejet dans data/tp7_rejets.csv              */
-    /* ------------------------------------------------------------------ */
 
     /* ------------------------------------------------------------------ */
     /* Step : chunk + faultTolerant + skip + retry                         */
@@ -117,9 +107,6 @@ class TP7_JobConfig {
             .processor(tp7Processor)
             .writer(tp7Writer)
             .faultTolerant()
-            .skip(FlatFileParseException::class.java)
-            .skip(NumberFormatException::class.java)
-            .skipLimit(6)
             .transactionManager(transactionManager)
             .build()
 
