@@ -43,12 +43,12 @@ out/
 testdb.*.db
 *.trace.db
 
-### TP5 : CSV genere depuis la base ###
-data/tp5_ventes.csv
-
-### TP6 : rapport genere (data/tp6_ventes.csv est une ENTREE, il reste versionne) ###
-data/tp6_ventes_sortie.csv
-data/tp6_ventes_sortie.json
-
-### TP7 : fichier de rejets genere (les 2 CSV corrompus sont des ENTREES versionnees) ###
-data/tp7_rejets.csv
+### SORTIES generees par les jobs (TP5/TP6/TP7) : tout va dans data/out/.          ###
+### Les ENTREES (ventes.csv, tp6_ventes.csv, tp7_ventes_*.csv) restent dans data/   ###
+### a la racine et VERSIONNEES. On conserve le dossier data/out/ (via .gitkeep) pour ###
+### qu'il existe au clone, mais on ignore son contenu genere.                        ###
+### NB : la regle IntelliJ "out/" plus haut ignore deja tout dossier "out" ; d'ou le ###
+### !data/out/ qui le re-inclut avant d'ignorer son contenu.                         ###
+!data/out/
+data/out/*
+!data/out/.gitkeep

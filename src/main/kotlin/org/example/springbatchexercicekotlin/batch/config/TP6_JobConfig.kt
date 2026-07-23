@@ -100,4 +100,4 @@ class TP6_JobConfig {
 }
 
 
-fun cheminRapportTp6(format: String): String = "data/tp6_ventes_sortie.${format.lowercase()}"
+fun cheminRapportTp6(format: String): String = "data/out/tp6_ventes_sortie.${format.lowercase()}"

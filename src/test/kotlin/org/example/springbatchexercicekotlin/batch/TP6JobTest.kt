@@ -197,8 +197,8 @@ class TP6JobTest {
 
     @Test
     fun `09 writer - l extension du fichier de sortie suit le format`() {
-        assertEquals("data/tp6_ventes_sortie.csv", cheminRapportTp6("CSV"))
-        assertEquals("data/tp6_ventes_sortie.json", cheminRapportTp6("JSON"))
+        assertEquals("data/out/tp6_ventes_sortie.csv", cheminRapportTp6("CSV"))
+        assertEquals("data/out/tp6_ventes_sortie.json", cheminRapportTp6("JSON"))
 
         File(cheminRapportTp6("CSV")).delete()
         File(cheminRapportTp6("JSON")).delete()

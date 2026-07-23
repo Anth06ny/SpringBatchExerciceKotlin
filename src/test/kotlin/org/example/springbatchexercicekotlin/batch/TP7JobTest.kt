@@ -26,7 +26,7 @@ import kotlin.test.assertTrue
  * Les tests sont numerotes et executes dans l'ordre du cours :
  *   01-02  SKIP LECTURE    : FlatFileParseException skippee, skipLimit(6)
  *   03-05  SKIP TRAITEMENT : VenteInvalideException (montant <= 0) skippee
- *   06-08  LISTENER        : les rejets sont traces dans data/tp7_rejets.csv
+ *   06-08  LISTENER        : les rejets sont traces dans data/out/tp7_rejets.csv
  *   09-11  RETRY           : VenteInstableException (panne simulee) rejouee
  *   12     CHAINE          : skip et retry combines sur le fichier 10L
  *
@@ -132,7 +132,7 @@ class TP7JobTest {
     }
 
     /* ========================================================================= */
-    /* LISTENER — chaque rejet est trace dans data/tp7_rejets.csv                */
+    /* LISTENER — chaque rejet est trace dans data/out/tp7_rejets.csv                */
     /* ========================================================================= */
 
     @Test
