@@ -27,3 +27,8 @@ const val TP7_REJETS_CSV = "data/out/tp7_rejets.csv"
 // ("pas-une-date"). Elle passe le reader et la regle metier, mais fait echouer
 // LocalDate.parse -> DateTimeParseException, une exception NI skippee NI retry.
 const val TP7_VENTES_ERREUR_INATTENDUE_CSV = "data/tp7_ventes_erreur_inattendue.csv"
+
+// TP8 : objectif de chiffre d'affaires du jour. Le bilan (afterStep) en deduit
+// l'ExitStatus metier : >= objectif -> OBJECTIF_ATTEINT, >= moitie -> A_SURVEILLER,
+// sinon -> ALERTE. Ces exitCodes aiguilleront les flows au TP8 partie 2.
+const val OBJECTIF_CA = 1000.0

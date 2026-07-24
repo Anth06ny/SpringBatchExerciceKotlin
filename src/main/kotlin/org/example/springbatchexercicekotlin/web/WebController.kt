@@ -1,9 +1,6 @@
 package org.example.springbatchexercicekotlin.web
 
-import org.example.springbatchexercicekotlin.batch.TIME_FORMAT
-import org.example.springbatchexercicekotlin.batch.TP7_REJETS_CSV
-import org.example.springbatchexercicekotlin.batch.TP7_VENTES_5L_CSV
-import org.example.springbatchexercicekotlin.batch.VENTES_CSV
+import org.example.springbatchexercicekotlin.batch.*
 import org.example.springbatchexercicekotlin.batch.config.cheminRapportTp6
 import org.example.springbatchexercicekotlin.batch.repository.VenteRepository
 import org.springframework.batch.core.BatchStatus
@@ -32,7 +29,8 @@ class WebController(
     private val helloJob: Job,
     private val tp5Job: Job,
     private val tp6Job: Job,
-    private val tp7Job: Job
+    private val tp7Job: Job,
+    private val tp8Job: Job
 
 ) {
 
@@ -206,6 +204,31 @@ class WebController(
         else {
             redirect.addFlashAttribute("errorMessage", texte)
         }
+        return "redirect:/"
+    }
+
+    @PostMapping("/jobs/tp8")
+    fun tp8(
+        @RequestParam(defaultValue = "0") caJour: Double,
+        redirect: RedirectAttributes
+    ): String {
+
+        val params = JobParametersBuilder()
+            .addDouble("caJour", caJour)
+            .addLong("timestamp", System.currentTimeMillis())
+            .toJobParameters()
+
+        val execution = jobOperator.start(tp8Job, params)
+
+        // Le job REUSSIT toujours (BatchStatus COMPLETED) : c'est l'exitCode (metier)
+        // qui change selon le CA. Il apparait dans la colonne "exit" du panneau.
+        redirect.addFlashAttribute(
+            "message",
+            """
+                tp8Job → statut=${execution.status} 
+                (CA=$caJour €, objectif=$OBJECTIF_CA €)"
+            """.trimIndent()
+        )
         return "redirect:/"
     }
 

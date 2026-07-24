@@ -322,7 +322,7 @@
 
                     <select name="fichierSource"
                             style="margin-left:.5rem;padding:.5rem .7rem;border-radius:8px;
-                                   border:1px solid var(--border);background:#0b1220;color:var(--text)">
+                                       border:1px solid var(--border);background:#0b1220;color:var(--text)">
                         <option value="data/tp7_ventes_5lcorrompues.csv">tp7_ventes_5lcorrompues.csv (80 l., 5 corrompues)</option>
                         <option value="data/tp7_ventes_10lcorrompues.csv">tp7_ventes_10lcorrompues.csv (80 l., 10 corrompues)</option>
                     </select>
@@ -330,11 +330,31 @@
                     <input type="text" name="runId" value="" placeholder="runId (vide = auto)"
                            title="Meme runId = meme JobInstance : permet le restart apres echec"
                            style="margin-left:.5rem;width:10rem;padding:.5rem .7rem;border-radius:8px;
-                                  border:1px solid var(--border);background:#0b1220;color:var(--text)">
+                                      border:1px solid var(--border);background:#0b1220;color:var(--text)">
 
                     <label style="margin-left:.5rem;font-size:.85rem;color:var(--muted);cursor:pointer">
                         <input type="checkbox" name="risque" value="true"> risque de panne (1/10)
                     </label>
+                </form>
+            </section>
+
+            <!-- TP 8 : ExitStatus personnalise (partie 1) -->
+            <section class="card">
+                <h2>TP 8 : ExitStatus personnalisé</h2>
+                <p class="desc">
+                    Saisis un chiffre d'affaires : le step <strong>réussit toujours</strong>
+                    (BatchStatus <code>COMPLETED</code>), mais son <strong>exitCode</strong>
+                    change selon le montant — <code>OBJECTIF_ATTEINT</code> (≥ 1000),
+                    <code>A_SURVEILLER</code> (≥ 500) ou <code>ALERTE</code> (&lt; 500).
+                    Observe la colonne <strong>exit</strong> du panneau. Ces codes serviront
+                    à aiguiller les flows au TP8 partie 2.
+                </p>
+                <form th:action="@{/jobs/tp8}" method="post">
+                    <button type="submit">▶ Lancer le TP8 (bilan CA)</button>
+                    <input type="number" name="caJour" value="1200" min="0" step="50"
+                           title="Chiffre d'affaires du jour (objectif = 1000)"
+                           style="margin-left:.5rem;width:8rem;padding:.5rem .7rem;border-radius:8px;
+                                      border:1px solid var(--border);background:#0b1220;color:var(--text)">
                 </form>
             </section>
 
