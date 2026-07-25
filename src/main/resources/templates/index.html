@@ -468,5 +468,36 @@
         </aside>
     </div>
 </main>
+
+    <script>
+        // Filtre d'affichage des TP : /?start=8 n'affiche que les cartes dont le n° de TP est >= 8.
+        // Le controleur redirige vers "/" apres chaque job (ce qui perdrait le parametre), donc on
+        // memorise la valeur dans localStorage pour que le filtre survive au redirect.
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('start')) {
+                const v = parseInt(params.get('start'), 10);
+                if (v > 1) localStorage.setItem('tpStart', String(v)); else localStorage.removeItem('tpStart');
+            }
+            const start = parseInt(params.get('start') ?? localStorage.getItem('tpStart') ?? '1', 10) || 1;
+            if (start <= 1) return;
+
+            document.querySelectorAll('section.card').forEach(card => {
+                const h2 = card.querySelector('h2');
+                const m = h2 && h2.textContent.match(/TP\s*(\d+)/i);
+                if (m && parseInt(m[1], 10) < start) card.style.display = 'none';
+            });
+
+            const bar = document.createElement('div');
+            bar.className = 'flash';
+            bar.style.background = 'rgba(99,102,241,.15)';
+            bar.style.borderColor = 'rgba(99,102,241,.4)';
+            bar.style.color = 'inherit';
+            bar.innerHTML = 'Filtre : seuls les TP ≥ ' + start +
+                ' sont affichés — <a href="?start=1" style="color:inherit;text-decoration:underline">tout afficher</a>';
+            const host = document.querySelector('.col-left') || document.querySelector('main');
+            host.insertBefore(bar, host.firstChild);
+        })();
+    </script>
 </body>
 </html>
