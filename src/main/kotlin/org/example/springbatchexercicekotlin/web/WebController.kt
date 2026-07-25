@@ -1,6 +1,7 @@
 package org.example.springbatchexercicekotlin.web
 
 import org.example.springbatchexercicekotlin.batch.*
+import org.example.springbatchexercicekotlin.batch.config.TP10_JobConfig
 import org.example.springbatchexercicekotlin.batch.config.cheminRapportTp6
 import org.example.springbatchexercicekotlin.batch.repository.VenteRepository
 import org.springframework.batch.core.BatchStatus
@@ -32,6 +33,8 @@ class WebController(
     private val tp6Job: Job,
     private val tp7Job: Job,
     private val tp8Job: Job,
+    private val tp10Job: Job,
+    private val tp10Tracker: TP10_JobConfig.Tp10Tracker,
     private val applicationContext: ApplicationContext
 
 ) {
@@ -262,6 +265,53 @@ class WebController(
         val texte = "tp9ex${exercice}Job → ${execution.status} " +
                 "(exitCode=${execution.exitStatus.exitCode}) — chemin : $chemin"
 
+        if (execution.status == BatchStatus.COMPLETED) {
+            redirect.addFlashAttribute("message", texte)
+        } else {
+            redirect.addFlashAttribute("errorMessage", texte)
+        }
+        return "redirect:/"
+    }
+
+    @PostMapping("/jobs/tp10")
+    fun tp10(redirect: RedirectAttributes): String {
+
+        // On vide la table VENTE avant l'import (comme au TP4) : chaque clic reflete
+        // le seul contenu du CSV. On remet aussi le tracker a zero pour que le bilan
+        // affiche les numeros de CE lancement uniquement.
+        venteRepository.deleteAll()
+        tp10Tracker.reset()
+
+        val params = JobParametersBuilder()
+            .addLong("timestamp", System.currentTimeMillis())
+            .toJobParameters()
+
+        val execution = jobOperator.start(tp10Job, params)
+
+        val step = execution.stepExecutions.first { it.stepName == "tp10Step" }
+        val start = execution.startTime
+        val end = execution.endTime
+        val duree = if (start != null && end != null) Duration.between(start, end).toMillis() else 0
+
+        // LE point du TP : le compteur PARTAGE du processor doit rester correct en parallele.
+        // distincts < total => des numeros ont ete dupliques (course sur l'etat partage).
+        val total = tp10Tracker.totalNumeros()
+        val distincts = tp10Tracker.numerosDistincts()
+        val threads = tp10Tracker.threads().size
+        val etatCompteur =
+            if (distincts == total) "$distincts/$total uniques ✅"
+            else "$distincts/$total uniques ⚠️ DOUBLONS, Le compteur n'est pas unique par vente !"
+
+        // Le produit portant le PLUS GRAND numero : doit finir par "_500" si le compteur
+        // est correct, un numero plus petit s'il a ete corrompu par la course.
+        val dernierLibelle = venteRepository.findAll()
+            .maxByOrNull { it.libelleProduit.substringAfterLast("_").toIntOrNull() ?: 0 }
+            ?.libelleProduit ?: "-"
+
+        val bilan = "lues=${step.readCount}, écrites=${step.writeCount}, " +
+                "numéros=$etatCompteur, threads=$threads en $duree ms\nLibelle le plus élevé=$dernierLibelle"
+
+        val texte = "tp10Job → ${execution.status} (exécution #${execution.id}) — $bilan"
         if (execution.status == BatchStatus.COMPLETED) {
             redirect.addFlashAttribute("message", texte)
         } else {

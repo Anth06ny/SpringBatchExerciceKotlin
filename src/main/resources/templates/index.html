@@ -92,6 +92,8 @@
             padding: 0.6rem 1rem;
             font-size: 0.88rem;
             margin-bottom: 1.25rem;
+            /* Rend les \n du message (composes cote controleur) comme des retours a la ligne */
+            white-space: pre-line;
         }
         /* Variante erreur : meme bloc, en rouge */
         .flash.error {
@@ -396,6 +398,21 @@
                         <button type="submit" name="exercice" value="12">12</button>
                         <button type="submit" name="exercice" value="13">13</button>
                     </div>
+                </form>
+            </section>
+
+            <section class="card">
+                <h2>TP 10 : Chunk parallélisé (multi-thread)</h2>
+                <p class="desc">
+                    Import de <strong>500 ventes</strong> avec un processor
+                    <strong>volontairement lent</strong> (simule une tarification externe).
+                    En mono-thread c'est long (<strong>~4,8 s</strong>) ; parallélisé avec un
+                    <code>TaskExecutor</code> ça tombe à <strong>~1,5 s</strong>.
+                    La table VENTE est vidée avant chaque lancement.
+                    Le bandeau montre <code>readCount</code> / <code>writeCount</code> et la durée.
+                </p>
+                <form th:action="@{/jobs/tp10}" method="post">
+                    <button type="submit">Lancer l'import parallélisé</button>
                 </form>
             </section>
 

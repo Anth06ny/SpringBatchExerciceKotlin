@@ -32,3 +32,10 @@ const val TP7_VENTES_ERREUR_INATTENDUE_CSV = "data/tp7_ventes_erreur_inattendue.
 // l'ExitStatus metier : >= objectif -> OBJECTIF_ATTEINT, >= moitie -> A_SURVEILLER,
 // sinon -> ALERTE. Ces exitCodes aiguilleront les flows au TP8 partie 2.
 const val OBJECTIF_CA = 1000.0
+
+// TP10 : 500 ventes a importer. Le processor simule une action LENTE (Thread.sleep)
+// pour rendre le step long en mono-thread -> on le parallelise avec un TaskExecutor.
+const val TP10_VENTES_CSV = "data/tp10_ventes.csv"
+
+// Duree du "gros traitement" simule par item (ms). En mono-thread : 500 x cette duree.
+const val TP10_SLEEP_MS = 8L
