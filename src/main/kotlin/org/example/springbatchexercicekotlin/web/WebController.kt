@@ -9,6 +9,7 @@ import org.springframework.batch.core.job.JobExecutionException
 import org.springframework.batch.core.job.parameters.JobParametersBuilder
 import org.springframework.batch.core.launch.JobOperator
 import org.springframework.batch.core.repository.JobRepository
+import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -30,7 +31,8 @@ class WebController(
     private val tp5Job: Job,
     private val tp6Job: Job,
     private val tp7Job: Job,
-    private val tp8Job: Job
+    private val tp8Job: Job,
+    private val applicationContext: ApplicationContext
 
 ) {
 
@@ -229,6 +231,42 @@ class WebController(
                 (CA=$caJour €, objectif=$OBJECTIF_CA €)"
             """.trimIndent()
         )
+        return "redirect:/"
+    }
+
+    @PostMapping("/jobs/tp9")
+    fun tp9(
+        @RequestParam(defaultValue = "1") exercice: Int,
+        @RequestParam(defaultValue = "") scenario: String,
+        @RequestParam(defaultValue = "0") montant: Double,
+        @RequestParam(defaultValue = "false") echouer: Boolean,
+        redirect: RedirectAttributes
+    ): String {
+
+        // Un seul controleur pour les 10 exercices : on recupere le job par son nom.
+        val job = applicationContext.getBean("tp9ex${exercice}Job", Job::class.java)
+
+        val params = JobParametersBuilder()
+            .addString("scenario", scenario, false)
+            .addDouble("montant", montant, false)
+            .addString("echouer", echouer.toString(), false)
+            .addLong("timestamp", System.currentTimeMillis())
+            .toJobParameters()
+
+        val execution = jobOperator.start(job, params)
+
+        // Le panneau de droite montre les steps reellement executes (le chemin pris).
+        val chemin = execution.stepExecutions
+            .sortedBy { it.id }
+            .joinToString(" → ") { it.stepName }
+        val texte = "tp9ex${exercice}Job → ${execution.status} " +
+                "(exitCode=${execution.exitStatus.exitCode}) — chemin : $chemin"
+
+        if (execution.status == BatchStatus.COMPLETED) {
+            redirect.addFlashAttribute("message", texte)
+        } else {
+            redirect.addFlashAttribute("errorMessage", texte)
+        }
         return "redirect:/"
     }
 

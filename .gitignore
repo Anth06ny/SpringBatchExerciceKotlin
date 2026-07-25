@@ -41,7 +41,9 @@ out/
 
 ### H2 (base de metadonnees Batch, artefacts d execution) ###
 testdb.*.db
+*.mv.db
 *.trace.db
+*.lock.db
 
 ### SORTIES generees par les jobs (TP5/TP6/TP7) : tout va dans data/out/.          ###
 ### Les ENTREES (ventes.csv, tp6_ventes.csv, tp7_ventes_*.csv) restent dans data/   ###

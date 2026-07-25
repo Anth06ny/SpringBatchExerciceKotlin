@@ -358,6 +358,47 @@
                 </form>
             </section>
 
+            <!-- TP 9 : conditionnement du flow -->
+            <section class="card">
+                <h2>TP 9 : Conditionnement du flow</h2>
+                <p class="desc">
+                    13 exercices : assemble les <strong>briques</strong> (steps déjà écrits) dans
+                    des <strong>jobs</strong> pour reproduire les schémas de l'énoncé. Règle les
+                    paramètres puis clique le <strong>numéro</strong> de l'exercice. Le chemin
+                    parcouru s'affiche dans le bandeau et le panneau de droite.
+                    <br><code>scenario</code> pilote <code>controleStep</code> ·
+                    <code>montant</code> le decider (ex 9) · <code>échouer</code> fait planter
+                    <code>traitementStep</code> (ex 5, 8).
+                </p>
+                <form th:action="@{/jobs/tp9}" method="post">
+                    <input type="text" name="scenario" placeholder="scenario (PREMIUM, VIDE, A1…)"
+                           style="width:16rem;padding:.5rem .7rem;border-radius:8px;
+                                  border:1px solid var(--border);background:#0b1220;color:var(--text)">
+                    <input type="number" name="montant" value="0" step="100"
+                           title="Exercice 9 : montant > 1000 = GROS"
+                           style="margin-left:.5rem;width:7rem;padding:.5rem .7rem;border-radius:8px;
+                                  border:1px solid var(--border);background:#0b1220;color:var(--text)">
+                    <label style="margin-left:.5rem;font-size:.85rem;color:var(--muted);cursor:pointer">
+                        <input type="checkbox" name="echouer" value="true"> échouer (traitementStep)
+                    </label>
+                    <div style="margin-top:.7rem;display:flex;flex-wrap:wrap;gap:.4rem">
+                        <button type="submit" name="exercice" value="1">1</button>
+                        <button type="submit" name="exercice" value="2">2</button>
+                        <button type="submit" name="exercice" value="3">3</button>
+                        <button type="submit" name="exercice" value="4">4</button>
+                        <button type="submit" name="exercice" value="5">5</button>
+                        <button type="submit" name="exercice" value="6">6</button>
+                        <button type="submit" name="exercice" value="7">7</button>
+                        <button type="submit" name="exercice" value="8">8</button>
+                        <button type="submit" name="exercice" value="9">9</button>
+                        <button type="submit" name="exercice" value="10">10</button>
+                        <button type="submit" name="exercice" value="11">11</button>
+                        <button type="submit" name="exercice" value="12">12</button>
+                        <button type="submit" name="exercice" value="13">13</button>
+                    </div>
+                </form>
+            </section>
+
             <!--
                 Pour ajouter un TP :
                 1. Ajoute un @PostMapping("/jobs/monTp") dans WebController

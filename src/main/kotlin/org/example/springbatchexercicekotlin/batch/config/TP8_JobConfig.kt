@@ -12,23 +12,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.transaction.PlatformTransactionManager
 
-/**
- * TP8 (partie 1) — ExitStatus personnalise.
- *
- * Objectif : un step qui REUSSIT toujours (BatchStatus = COMPLETED), mais dont
- * l'exitCode varie selon le chiffre d'affaires du jour (JobParameter `caJour`) :
- *
- *   caJour >= OBJECTIF_CA        -> "OBJECTIF_ATTEINT"
- *   caJour >= OBJECTIF_CA / 2    -> "A_SURVEILLER"
- *   sinon                        -> "ALERTE"
- *
- * A distinguer :
- *   - BatchStatus : enum interne (COMPLETED / FAILED...) — reste COMPLETED ici.
- *   - ExitStatus  : exitCode + description, sert au reporting et a l'aiguillage
- *                   (.on("ALERTE").to(...)) — c'est lui qu'on module.
- *
- * A CODER : le corps de Tp8BilanListener.afterStep (voir le TODO).
- */
+
 @Configuration
 class TP8_JobConfig {
 
