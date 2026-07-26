@@ -2,6 +2,7 @@ package org.example.springbatchexercicekotlin.web
 
 import org.example.springbatchexercicekotlin.batch.*
 import org.example.springbatchexercicekotlin.batch.config.TP10_JobConfig
+import org.example.springbatchexercicekotlin.batch.config.TP11_JobConfig
 import org.example.springbatchexercicekotlin.batch.config.cheminRapportTp6
 import org.example.springbatchexercicekotlin.batch.repository.VenteRepository
 import org.springframework.batch.core.BatchStatus
@@ -35,8 +36,9 @@ class WebController(
     private val tp8Job: Job,
     private val tp10Job: Job,
     private val tp10Tracker: TP10_JobConfig.Tp10Tracker,
+    private val tp11Job: Job,
+    private val tp11Tracker: TP11_JobConfig.Tp11Tracker,
     private val applicationContext: ApplicationContext
-
 ) {
 
 
@@ -312,6 +314,61 @@ class WebController(
                 "numéros=$etatCompteur, threads=$threads en $duree ms\nLibelle le plus élevé=$dernierLibelle"
 
         val texte = "tp10Job → ${execution.status} (exécution #${execution.id}) — $bilan"
+        if (execution.status == BatchStatus.COMPLETED) {
+            redirect.addFlashAttribute("message", texte)
+        } else {
+            redirect.addFlashAttribute("errorMessage", texte)
+        }
+        return "redirect:/"
+    }
+
+    @PostMapping("/jobs/tp11")
+    fun tp11(
+        @RequestParam(defaultValue = "") runId: String,
+        @RequestParam(defaultValue = "false") casserB10: Boolean,
+        redirect: RedirectAttributes
+    ): String {
+
+        // runId vide -> genere depuis la date : chaque clic = nouvelle JobInstance.
+        // Ressaisir le MEME runId = restart de la meme instance (cf. TP3) : c'est ce
+        // qui permet l'exercice de reprise (casser B10 puis relancer sans casser).
+        val id = runId.ifBlank {
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))
+        }
+
+        // Restart ? = une instance existe deja pour ce runId (parametre IDENTIFIANT).
+        // On ne vide la table QUE pour un nouveau run : au restart, les 9 partitions
+        // deja COMPLETED ne rejouent pas -> leurs lignes doivent rester en base
+        // (sinon on perdrait 450 ventes et le total final ne ferait plus 500).
+        val estRestart = jobRepository.getJobInstance(
+            "tp11Job",
+            JobParametersBuilder().addString("runId", id).toJobParameters()
+        ) != null
+        if (!estRestart) {
+            venteRepository.deleteAll()
+        }
+        tp11Tracker.reset()
+
+        val params = JobParametersBuilder()
+            .addString("runId", id)                              // IDENTIFIANT
+            .addString("casserB10", casserB10.toString(), false) // NON identifiant
+            .toJobParameters()
+
+        val execution = jobOperator.start(tp11Job, params)
+
+        val start = execution.startTime
+        val end = execution.endTime
+        val duree = if (start != null && end != null) Duration.between(start, end).toMillis() else 0
+
+        // Steps esclaves rejoues dans CETTE execution (nommes "tp11WorkerStep:partitionN").
+        // Au restart, seule la partition en echec rejoue -> on en voit 1 (et non 10).
+        val partitions = execution.stepExecutions.filter { it.stepName.startsWith("tp11WorkerStep") }
+        val threads = tp11Tracker.threads().size
+
+        val bilan = "${partitions.size} partition(s) exécutée(s), " +
+                "${venteRepository.count()} ventes en base, threads=$threads, en $duree ms"
+
+        val texte = "tp11Job (runId=$id) → ${execution.status} (exécution #${execution.id}) — $bilan"
         if (execution.status == BatchStatus.COMPLETED) {
             redirect.addFlashAttribute("message", texte)
         } else {

@@ -39,3 +39,6 @@ const val TP10_VENTES_CSV = "data/tp10_ventes.csv"
 
 // Duree du "gros traitement" simule par item (ms). En mono-thread : 500 x cette duree.
 const val TP10_SLEEP_MS = 8L
+
+// Meme "gros traitement" simule qu'au TP10, pour rendre le parallelisme observable.
+const val TP11_SLEEP_MS = 8L

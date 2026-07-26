@@ -16,9 +16,6 @@ import org.springframework.transaction.PlatformTransactionManager
 @Configuration
 class TP8_JobConfig {
 
-    /* ------------------------------------------------------------------ */
-    /* Step : un Tasklet minimal — tout l'interet est dans le LISTENER.    */
-    /* ------------------------------------------------------------------ */
 
     @Bean
     fun tp8Step(
