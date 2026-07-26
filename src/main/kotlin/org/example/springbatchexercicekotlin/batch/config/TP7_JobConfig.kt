@@ -79,7 +79,7 @@ class TP7_JobConfig {
     fun tp7Writer(entityManagerFactory: EntityManagerFactory): ItemWriter<VenteEntity> {
         val jpaWriter: JpaItemWriter<VenteEntity> = JpaItemWriterBuilder<VenteEntity>()
             .entityManagerFactory(entityManagerFactory)
-            .usePersist(true)
+            //.usePersist(true)
             .build()
 
         return ItemWriter { chunk ->
