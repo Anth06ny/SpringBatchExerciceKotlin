@@ -38,6 +38,7 @@ class WebController(
     private val tp10Tracker: TP10_JobConfig.Tp10Tracker,
     private val tp11Job: Job,
     private val tp11Tracker: TP11_JobConfig.Tp11Tracker,
+    private val tp12Job: Job,
     private val applicationContext: ApplicationContext
 ) {
 
@@ -369,6 +370,29 @@ class WebController(
                 "${venteRepository.count()} ventes en base, threads=$threads, en $duree ms"
 
         val texte = "tp11Job (runId=$id) → ${execution.status} (exécution #${execution.id}) — $bilan"
+        if (execution.status == BatchStatus.COMPLETED) {
+            redirect.addFlashAttribute("message", texte)
+        } else {
+            redirect.addFlashAttribute("errorMessage", texte)
+        }
+        return "redirect:/"
+    }
+
+    @PostMapping("/jobs/tp12")
+    fun tp12(redirect: RedirectAttributes): String {
+
+        val params = JobParametersBuilder()
+            .addLong("timestamp", System.currentTimeMillis())
+            .toJobParameters()
+
+        val execution = jobOperator.start(tp12Job, params)
+
+        // On relit le fichier fusionne pour afficher le resultat (hors en-tete).
+        val fichier = java.io.File(TP12_FUSION_OUTPUT)
+        val lignes = if (fichier.exists()) fichier.readLines().drop(1) else emptyList()
+        val bilan = "${lignes.size} lignes fusionnees (sans doublon) → $TP12_FUSION_OUTPUT"
+
+        val texte = "tp12Job → ${execution.status} (exécution #${execution.id}) — $bilan"
         if (execution.status == BatchStatus.COMPLETED) {
             redirect.addFlashAttribute("message", texte)
         } else {

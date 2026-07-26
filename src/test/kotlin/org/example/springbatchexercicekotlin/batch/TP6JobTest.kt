@@ -1,5 +1,6 @@
 package org.example.springbatchexercicekotlin.batch
 
+import org.example.springbatchexercicekotlin.batch.config.TP6_JobConfig
 import org.example.springbatchexercicekotlin.batch.config.cheminRapportTp6
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Test
@@ -9,6 +10,10 @@ import org.springframework.batch.core.job.Job
 import org.springframework.batch.core.job.JobExecution
 import org.springframework.batch.core.job.parameters.JobParametersBuilder
 import org.springframework.batch.core.launch.JobOperator
+import org.springframework.batch.infrastructure.item.ExecutionContext
+import org.springframework.batch.infrastructure.item.ItemStreamReader
+import org.springframework.batch.test.MetaDataInstanceFactory
+import org.springframework.batch.test.StepScopeTestUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
@@ -42,6 +47,10 @@ class TP6JobTest {
     @Autowired
     @Qualifier("tp6Job")
     lateinit var tp6Job: Job
+
+    // Le PROXY @StepScope, injectable normalement comme n'importe quel bean
+    @Autowired
+    lateinit var tp6Reader: ItemStreamReader<TP6_JobConfig.TP6VenteDTO>
 
     /* ========================================================================= */
     /* READER — le parametre `fichierSource` decide du fichier lu                */
@@ -86,6 +95,33 @@ class TP6JobTest {
         )
         assertEquals(attendues.size.toLong(), stepChunk(execution).readCount)
     }
+
+    /**
+     * Meme point que les tests 01/02 (le SpEL `#{jobParameters['fichierSource']}` doit se
+     * resoudre), mais isole : pas de job, pas de processor, pas de writer, pas de fichier de
+     * sortie. Si ce test casse, le probleme vient du reader ; s'il passe mais que 01/02
+     * echouent, le probleme est ailleurs dans la chaine (processor, writer...).
+     */
+    @Test
+    fun `02b reader isole - StepScope resout fichierSource sans lancer tout le job`() {
+        val params = JobParametersBuilder()
+            .addString("fichierSource", TP6_VENTES_CSV)
+            .toJobParameters()
+
+        // Fabrique une StepExecution portant CES JobParameters, sans jamais lancer tp6Job.
+        val stepExecution = MetaDataInstanceFactory.createStepExecution(params)
+
+        // StepScopeTestUtils.doInStepScop enregistre ce StepExecution le temps du bloc.
+        val premiereLigne = StepScopeTestUtils.doInStepScope<TP6_JobConfig.TP6VenteDTO>(stepExecution) {
+            tp6Reader.open(ExecutionContext())
+            tp6Reader.read() ?: error("tp6Reader n'a renvoye aucune ligne : fichierSource mal resolu ?")
+        }
+
+        // tp6_ventes.csv (boutiques B05-B07) : premiere ligne de donnees = B05
+        assertEquals("B05", premiereLigne.idBoutique)
+    }
+
+
 
     /* ========================================================================= */
     /* PROCESSOR — `montantMini` filtre, `totalTtc` convertit                    */

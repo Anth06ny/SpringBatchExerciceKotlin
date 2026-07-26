@@ -8,6 +8,10 @@ import org.springframework.batch.core.job.Job
 import org.springframework.batch.core.job.JobExecution
 import org.springframework.batch.core.job.parameters.JobParametersBuilder
 import org.springframework.batch.core.launch.JobOperator
+import org.springframework.batch.core.repository.JobRepository
+import org.springframework.batch.core.step.Step
+import org.springframework.batch.infrastructure.item.ExecutionContext
+import org.springframework.batch.test.JobOperatorTestUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
@@ -15,6 +19,16 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+/**
+ * Suite de validation du TP9 (conditionnement du flow).
+ *
+ * 1 test = 1 exercice. Chaque test lance le job de l'exercice avec les parametres
+ * qui pilotent la branche (scenario / montant / echouer) et verifie :
+ *   - le BatchStatus final (COMPLETED / FAILED / STOPPED) ;
+ *   - le CHEMIN reellement parcouru = la liste des steps executes.
+ *
+ * Les briques (steps) sont dans TP9_Steps ; les jobs a reproduire dans TP9_JobConfig.
+ */
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.MethodName::class)
 class TP9JobTest {
@@ -25,6 +39,17 @@ class TP9JobTest {
     @Autowired
     lateinit var applicationContext: ApplicationContext
 
+    @Autowired
+    lateinit var jobRepository: JobRepository
+
+    // Le step a isoler : injecte directement, pas besoin de passer par un Job complet
+    @Autowired
+    lateinit var controleStep: Step
+
+
+
+    /* ===== EX 1 — Sequentiel ================================================= */
+
     @Test
     fun `01 sequentiel - preparation puis expedition puis archivage`() {
         val execution = lancer(1)
@@ -32,6 +57,8 @@ class TP9JobTest {
         assertEquals(BatchStatus.COMPLETED, execution.status)
         assertEquals(listOf("preparationStep", "expeditionStep", "archivageStep"), steps(execution))
     }
+
+    /* ===== EX 2 — Deux branches sur ExitStatus =============================== */
 
     @Test
     fun `02 deux branches - PREMIUM vers expedition sinon preparation`() {
@@ -42,6 +69,30 @@ class TP9JobTest {
         val standard = lancer(2, scenario = "STANDARD")
         assertEquals(listOf("controleStep", "preparationStep"), steps(standard))
     }
+
+    /**
+     * Meme point que le test 02 (le ScenarioListener doit transformer `scenario` en
+     * ExitStatus), mais isole : on ne passe par aucun job/flow, donc aucune dependance
+     * au routage .on(...).to(...). Si ce test casse, le probleme vient du listener ;
+     * s'il passe mais que 02 echoue, le probleme est dans le flow (routage).
+     */
+    @Test
+    fun `02b controleStep isole - exitStatus suit le parametre scenario`() {
+        val params = JobParametersBuilder()
+            .addString("scenario", "PREMIUM", false)
+            .addLong("run", System.nanoTime())
+            .toJobParameters()
+
+        // Construit a la main (pas @SpringBatchTest : son JobScopeTestExecutionListener
+        val jobOperatorTestUtils = JobOperatorTestUtils(jobOperator, jobRepository)
+
+        val execution = jobOperatorTestUtils.startStep(controleStep, params, ExecutionContext())
+
+        assertEquals(BatchStatus.COMPLETED, execution.status)
+        assertEquals("PREMIUM", execution.stepExecutions.first().exitStatus.exitCode)
+    }
+
+    /* ===== EX 3 — Fin anticipee .end() ====================================== */
 
     @Test
     fun `03 fin anticipee - VIDE termine le job sans archivage`() {
@@ -54,6 +105,8 @@ class TP9JobTest {
         assertTrue(steps(plein).contains("archivageStep"))
     }
 
+    /* ===== EX 4 — Echec explicite .fail() =================================== */
+
     @Test
     fun `04 echec explicite - CORROMPU passe par alerte puis fait echouer le job`() {
         val corrompu = lancer(4, scenario = "CORROMPU")
@@ -64,6 +117,8 @@ class TP9JobTest {
         assertEquals(BatchStatus.COMPLETED, ok.status)
         assertTrue(steps(ok).contains("archivageStep"))
     }
+
+    /* ===== EX 5 — Reagir a l'echec (.on("FAILED")) ========================== */
 
     @Test
     fun `05 reagir a l'echec - traitement KO route vers notification, job COMPLETED`() {
@@ -77,6 +132,8 @@ class TP9JobTest {
         assertEquals(listOf("traitementStep", "archivageStep"), steps(ok))
     }
 
+    /* ===== EX 6 — Wildcards ? et * ========================================== */
+
     @Test
     fun `06 wildcards - A suivi d'un caractere vers preparation, sinon archivage`() {
         assertTrue(steps(lancer(6, scenario = "A1")).contains("preparationStep"),
@@ -86,6 +143,8 @@ class TP9JobTest {
         assertTrue(steps(lancer(6, scenario = "A")).contains("archivageStep"),
             "A seul (1 caractere) ne correspond PAS a A? (qui exige A + 1 caractere)")
     }
+
+    /* ===== EX 7 — Pause .stopAndRestart() =================================== */
 
     @Test
     fun `07 pause - ATTENTE met le job en STOPPED`() {
@@ -119,6 +178,8 @@ class TP9JobTest {
             "controleStep re-evalue sort desormais vers archivageStep")
     }
 
+    /* ===== EX 8 — Publication catalogue : flow imbrique ==================== */
+
     @Test
     fun `08 publication - licence, deja publie, validation absorbee`() {
         val sansLicence = lancer(8, scenario = "SANS_LICENCE")
@@ -149,6 +210,8 @@ class TP9JobTest {
             steps(validationKo))
     }
 
+    /* ===== EX 9 — Commande : flow riche imbrique ============================ */
+
     @Test
     fun `09 commande - rupture, stock partiel, controle qualite`() {
         val rupture = lancer(9, scenario = "RUPTURE")
@@ -175,6 +238,8 @@ class TP9JobTest {
         )
     }
 
+    /* ===== EX 10 — Paiement (depuis une histoire) ========================== */
+
     @Test
     fun `10 paiement - carte refusee, fraude, capture`() {
         val refusee = lancer(10, scenario = "CARTE_REFUSEE")
@@ -199,6 +264,8 @@ class TP9JobTest {
             "Echec de capture : rapport d'incident puis .fail()")
     }
 
+    /* ===== EX 11 — JobExecutionDecider ====================================== */
+
     @Test
     fun `11 decider - gros montant vers notification, petit vers archivage`() {
         val gros = lancer(11, montant = 5000.0)
@@ -208,6 +275,8 @@ class TP9JobTest {
         val petit = lancer(11, montant = 50.0)
         assertEquals(listOf("importStep", "archivageStep"), steps(petit))
     }
+
+    /* ===== EX 12 — split() parallele ======================================== */
 
     @Test
     fun `12 split - rapport et archivage en parallele puis notification`() {
@@ -220,6 +289,8 @@ class TP9JobTest {
         assertEquals("notificationStep", noms.last(),
             "La notification vient APRES le split (les 2 flux paralleles rejoignent avant)")
     }
+
+    /* ===== EX 13 — Deux split() enchaines =================================== */
 
     @Test
     fun `13 cloture nuit - deux splits enchaines`() {
@@ -289,6 +360,7 @@ class TP9JobTest {
         return jobOperator.start(job, params)
     }
 
+    /** Les steps reellement executes, dans l'ordre (par id d'execution). */
     private fun steps(execution: JobExecution): List<String> =
         execution.stepExecutions.sortedBy { it.id }.map { it.stepName }
 }

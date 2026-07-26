@@ -446,6 +446,23 @@
                 </form>
             </section>
 
+            <!-- TP 12 : tester un batch -->
+            <section class="card">
+                <h2>TP 12 : Tester un batch</h2>
+                <p class="desc">
+                    TP <strong>inversé</strong> : le <code>TP12_JobConfig</code> est fourni,
+                    c'est le <strong>test</strong> qu'on écrit. Le job <strong>fusionne</strong>
+                    <code>ventes_A.csv</code> + <code>ventes_B.csv</code> dans un 3ᵉ fichier
+                    <strong>sans doublon</strong> (8 lignes = 5 + 5 − 2 doublons). Le reader
+                    <strong>valide l'en-tête</strong> : colonnes mal nommées / en désordre ou en
+                    nombre incorrect → refus. À toi d'écrire les 4 tests de
+                    <code>TP12JobTest</code> (reader isolé + job complet).
+                </p>
+                <form th:action="@{/jobs/tp12}" method="post">
+                    <button type="submit">Lancer la fusion des deux CSV</button>
+                </form>
+            </section>
+
             <!--
                 Pour ajouter un TP :
                 1. Ajoute un @PostMapping("/jobs/monTp") dans WebController

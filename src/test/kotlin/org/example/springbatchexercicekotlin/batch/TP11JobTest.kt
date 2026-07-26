@@ -50,7 +50,7 @@ class TP11JobTest {
         val execution = lancer()
 
         assertEquals(BatchStatus.COMPLETED, execution.status)
-        val workers = execution.stepExecutions.filter { it.stepName.contains("tp11", true) }
+        val workers = execution.stepExecutions.filter { it.stepName.startsWith("tp11WorkerStep:") }
         assertEquals(10, workers.size, "Une partition (step esclave) par fichier")
     }
 
@@ -102,14 +102,14 @@ class TP11JobTest {
         // 1er lancement : B10 casse -> sa partition FAILED, les 9 autres COMPLETED.
         val premier = lancerRestart(runId, casserB10 = true)
         assertEquals(BatchStatus.FAILED, premier.status)
-        val workers1 = premier.stepExecutions.filter { it.stepName.contains("tp11", true) }
+        val workers1 = premier.stepExecutions.filter { it.stepName.startsWith("tp11WorkerStep:") }
         assertEquals(1, workers1.count { it.status == BatchStatus.FAILED }, "1 partition en echec")
         assertEquals(9, workers1.count { it.status == BatchStatus.COMPLETED }, "9 partitions OK")
 
         // Restart (MEME instance) sans casser : seule la partition B10 doit rejouer.
         val second = lancerRestart(runId, casserB10 = false)
         assertEquals(BatchStatus.COMPLETED, second.status, "La reprise mene le job au bout")
-        val workers2 = second.stepExecutions.filter { it.stepName.contains("tp11", true) }
+        val workers2 = second.stepExecutions.filter { it.stepName.startsWith("tp11WorkerStep:") }
         assertEquals(
             1, workers2.size,
             "Au restart, SEULE la partition en echec rejoue (les 9 COMPLETED sont sautees)"

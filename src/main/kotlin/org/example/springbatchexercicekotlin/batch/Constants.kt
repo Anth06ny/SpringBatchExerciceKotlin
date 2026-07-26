@@ -42,3 +42,11 @@ const val TP10_SLEEP_MS = 8L
 
 // Meme "gros traitement" simule qu'au TP10, pour rendre le parallelisme observable.
 const val TP11_SLEEP_MS = 8L
+
+// TP12 : tests de batch. Le job fusionne deux CSV en un 3e, en supprimant les
+// doublons (lignes identiques). L'en-tete attendue est VALIDEE par le reader
+// (skippedLinesCallback) : ordre/nom des colonnes faux -> refus.
+const val TP12_ENTETE = "date;idBoutique;produit;montantHt"
+const val TP12_VENTES_A = "data/tp12/ventes_A.csv"
+const val TP12_VENTES_B = "data/tp12/ventes_B.csv"
+const val TP12_FUSION_OUTPUT = "data/out/tp12_fusion.csv"
