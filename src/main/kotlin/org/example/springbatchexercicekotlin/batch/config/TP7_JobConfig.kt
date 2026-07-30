@@ -106,7 +106,6 @@ class TP7_JobConfig {
             .reader(tp7Reader)
             .processor(tp7Processor)
             .writer(tp7Writer)
-            .faultTolerant()
             .transactionManager(transactionManager)
             .build()
 

@@ -18,9 +18,11 @@ class TP9_JobConfig {
         expeditionStep: Step,
         archivageStep: Step
     ): Job =
+        // @formatter:off
         JobBuilder("tp9ex1Job", jobRepository)
             .start(preparationStep)
             .build()
+        // @formatter:on
 
     @Bean
     fun tp9ex2Job(
@@ -29,9 +31,11 @@ class TP9_JobConfig {
         expeditionStep: Step,
         preparationStep: Step
     ): Job =
+        // @formatter:off
         JobBuilder("tp9ex2Job", jobRepository)
             .start(controleStep)
             .build()
+        // @formatter:on
 
     @Bean
     fun tp9ex3Job(
@@ -39,9 +43,11 @@ class TP9_JobConfig {
         controleStep: Step,
         archivageStep: Step
     ): Job =
+        // @formatter:off
         JobBuilder("tp9ex3Job", jobRepository)
             .start(controleStep)
             .build()
+        // @formatter:on
 
     @Bean
     fun tp9ex4Job(
@@ -50,9 +56,11 @@ class TP9_JobConfig {
         alerteStep: Step,
         archivageStep: Step
     ): Job =
+        // @formatter:off
         JobBuilder("tp9ex4Job", jobRepository)
             .start(controleStep)
             .build()
+        // @formatter:on
 
     @Bean
     fun tp9ex5Job(
@@ -61,9 +69,11 @@ class TP9_JobConfig {
         notificationStep: Step,
         archivageStep: Step
     ): Job =
+        // @formatter:off
         JobBuilder("tp9ex5Job", jobRepository)
             .start(traitementStep)
             .build()
+        // @formatter:on
 
     @Bean
     fun tp9ex6Job(
@@ -72,9 +82,11 @@ class TP9_JobConfig {
         preparationStep: Step,
         archivageStep: Step
     ): Job =
+        // @formatter:off
         JobBuilder("tp9ex6Job", jobRepository)
             .start(controleStep)
             .build()
+        // @formatter:on
 
     @Bean
     fun tp9ex7Job(
@@ -82,9 +94,11 @@ class TP9_JobConfig {
         controleStep: Step,
         archivageStep: Step
     ): Job =
+        // @formatter:off
         JobBuilder("tp9ex7Job", jobRepository)
             .start(controleStep)
             .build()
+        // @formatter:on
 
     @Bean
     fun tp9ex8Job(
@@ -97,9 +111,11 @@ class TP9_JobConfig {
         expeditionStep: Step,
         archivageStep: Step
     ): Job =
+        // @formatter:off
         JobBuilder("tp9ex8Job", jobRepository)
             .start(controleStep)
             .build()
+        // @formatter:on
 
     @Bean
     fun tp9ex9Job(
@@ -113,9 +129,11 @@ class TP9_JobConfig {
         expeditionStep: Step,
         archivageStep: Step
     ): Job =
+        // @formatter:off
         JobBuilder("tp9ex9Job", jobRepository)
             .start(controleStep)
             .build()
+        // @formatter:on
 
     @Bean
     fun tp9ex10Job(
@@ -128,9 +146,11 @@ class TP9_JobConfig {
         expeditionStep: Step,
         archivageStep: Step
     ): Job =
+        // @formatter:off
         JobBuilder("tp9ex10Job", jobRepository)
             .start(controleStep)
             .build()
+        // @formatter:on
 
 
 
@@ -142,24 +162,29 @@ class TP9_JobConfig {
         archivageStep: Step,
         //montantDecider: MontantDecider
     ): Job =
+        // @formatter:off
         JobBuilder("tp9ex11Job", jobRepository)
             .start(importStep)
             //.next(montantDecider).on("GROS").to(notificationStep)
             //.from(montantDecider).on("PETIT").to(archivageStep)
             //.end()
             .build()
+        // @formatter:on
 
 
     @Bean
     fun tp9ex12Job(
         jobRepository: JobRepository,
+        importStep: Step,
         rapportStep: Step,
         archivageStep: Step,
         notificationStep: Step
     ): Job =
+        // @formatter:off
         JobBuilder("tp9ex12Job", jobRepository)
-            .start(rapportStep)
+            .start(importStep)
             .build()
+        // @formatter:on
 
     // EX 13 — Cloture de nuit : DEUX split() enchaines (voir l'histoire + le schema).
     //   import -> [prepa->expedition || rapport->archivage] -> traitement -> [notification || archivage]
@@ -174,7 +199,9 @@ class TP9_JobConfig {
         notificationStep: Step,
         archivageStep: Step
     ): Job =
+        // @formatter:off
         JobBuilder("tp9ex13Job", jobRepository)
             .start(importStep)
             .build()
+        // @formatter:on
 }

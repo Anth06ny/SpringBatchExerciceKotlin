@@ -463,6 +463,41 @@
                 </form>
             </section>
 
+            <!-- TP final : planification de camions -->
+            <section class="card">
+                <h2>TP Projet final : Planification de camions</h2>
+                <p class="desc">
+                    Le batch <strong>capstone</strong> : un <code>commandes.csv</code>
+                    (<code>ville;magasin;nb</code>, 500 commandes, 8 grandes villes) traversé par
+                    <strong>4 steps</strong> — <strong>nettoyage</strong> (vide
+                    <code>data/out/tpfinal/</code> et la table), <strong>mise en base tolérante
+                    aux fautes</strong> (skip + rejets datés, comme le TP7),
+                    <strong>hausse météo en chunk parallélisé</strong> (+10 % &gt; 25°,
+                    +20 % &gt; 35°, comme le TP10 — un <em>cache partagé</em> garantit
+                    1 seul appel API par ville), puis un <strong>split</strong> (comme le TP9)
+                    qui génère en parallèle <code>entrepot/camions.txt</code> et 1 fichier par
+                    <strong>chauffeur</strong>.
+                    <br>
+                    Les commandes invalides sont simplement <strong>écartées et tracées</strong>
+                    dans <code>rejets.csv</code> : aucun seuil de refus, le job réussit.
+                    <br>
+                    <strong>Sorties :</strong> <code>data/out/tpfinal/</code>
+                    (<code>entrepot/</code>, <code>chauffeurs/</code>, et un dossier daté pour
+                    <code>rejets.csv</code>). Le dossier <code>data/tpfinal/out/</code> est
+                    l'<em>exemple</em> de résultat attendu, à comparer avec le tien.
+                </p>
+                <form th:action="@{/jobs/tpfinal}" method="post">
+                    <select name="fichierSource"
+                            style="padding:.5rem .7rem;border-radius:8px;border:1px solid var(--border);
+                                   background:#0b1220;color:var(--text)">
+                        <option value="data/tpfinal/commandes.csv">commandes.csv (500 valides)</option>
+                        <option value="data/tpfinal/commandes15lcorrompus.csv">15 corrompues (écartées)</option>
+                        <option value="data/tpfinal/commande25corrompu.csv">25 corrompues (écartées)</option>
+                    </select>
+                    <button type="submit" style="margin-left:.5rem">Lancer la planification</button>
+                </form>
+            </section>
+
             <!--
                 Pour ajouter un TP :
                 1. Ajoute un @PostMapping("/jobs/monTp") dans WebController

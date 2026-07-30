@@ -54,3 +54,10 @@ testdb.*.db
 !data/out/
 data/out/*
 !data/out/.gitkeep
+
+### TP FINAL : data/tpfinal/out/ est un EXEMPLE de sortie attendue, VERSIONNE   ###
+### (entrepot/camions.txt + chauffeurs/*.txt), pour comparer son resultat.       ###
+### Le job N'ECRIT PAS ici : ses sorties vont dans data/out/tpfinal/ (deja       ###
+### ignore par la regle data/out/* plus haut). L'exemple est donc fige.          ###
+### La regle IntelliJ "out/" ignorerait ce dossier : on le re-inclut.            ###
+!data/tpfinal/out/

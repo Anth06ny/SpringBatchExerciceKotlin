@@ -50,3 +50,36 @@ const val TP12_ENTETE = "date;idBoutique;produit;montantHt"
 const val TP12_VENTES_A = "data/tp12/ventes_A.csv"
 const val TP12_VENTES_B = "data/tp12/ventes_B.csv"
 const val TP12_FUSION_OUTPUT = "data/out/tp12_fusion.csv"
+
+// TP final : planification de camions. Un CSV "ville;magasin;nb" (500 commandes,
+// 8 grosses villes) -> mise en base -> hausse meteo -> camions.txt + 1 fichier par
+// chauffeur (ville) -> archivage.
+// ENTREES  : data/tpfinal/          (versionnees)
+// SORTIES  : data/out/tpfinal/      (generees, ignorees par git comme tout data/out/)
+// data/tpfinal/out/ n'est PLUS ecrit par le job : c'est l'EXEMPLE de sortie attendue,
+// versionne pour que l'apprenant compare son resultat.
+const val TPFINAL_COMMANDES_CSV = "data/tpfinal/commandes.csv"                 // 500 valides, total 56072
+const val TPFINAL_COMMANDES_15L_CSV = "data/tpfinal/commandes15lcorrompus.csv" // 15 invalides (8 illisibles / 7 negatives)
+const val TPFINAL_COMMANDES_25L_CSV = "data/tpfinal/commande25corrompu.csv"    // 25 invalides : passe aussi (aucun seuil)
+
+// Racine des sorties generees par le job.
+const val TPFINAL_OUT_DIR = "data/out/tpfinal"
+
+// Plan de livraison du jour : purge par tpFinalNettoyageStep, regenere par le split
+// camions/chauffeurs. Ces deux dossiers sont ECRASES a chaque execution.
+const val TPFINAL_CAMIONS_TXT = "$TPFINAL_OUT_DIR/entrepot/camions.txt"
+const val TPFINAL_CHAUFFEURS_DIR = "$TPFINAL_OUT_DIR/chauffeurs"
+
+// Les rejets sont ranges dans un dossier DATE (data/out/tpfinal/2026-07-29/rejets.csv).
+// Ce sont des FONCTIONS et pas des const : la date n'est connue qu'au lancement du job.
+fun dossierDuJourTpFinal(): String = "$TPFINAL_OUT_DIR/${java.time.LocalDate.now()}"
+
+/** Les commandes rejetees et leur cause (ecrase a chaque execution du step d'import). */
+fun cheminRejetsTpFinal(): String = "${dossierDuJourTpFinal()}/rejets.csv"
+
+// Hausse liee a la chaleur : > 25° -> +10%, > 35° -> +20%.
+const val TPFINAL_SEUIL_CHAUD = 25.0
+const val TPFINAL_SEUIL_CANICULE = 35.0
+
+
+

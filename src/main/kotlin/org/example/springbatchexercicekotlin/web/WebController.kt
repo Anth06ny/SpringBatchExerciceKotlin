@@ -30,6 +30,7 @@ class WebController(
     private val jobRepository: JobRepository,
     private val venteRepository: VenteRepository,
     private val helloJob: Job,
+    private val tp4Job: Job,
     private val tp5Job: Job,
     private val tp6Job: Job,
     private val tp7Job: Job,
@@ -39,8 +40,11 @@ class WebController(
     private val tp11Job: Job,
     private val tp11Tracker: TP11_JobConfig.Tp11Tracker,
     private val tp12Job: Job,
+    private val tpFinalJob: Job,
     private val applicationContext: ApplicationContext
 ) {
+
+
 
 
     @GetMapping("/")
@@ -115,9 +119,15 @@ class WebController(
         // contenu du CSV (sinon les lignes s'accumuleraient à chaque relance).
         venteRepository.deleteAll()
 
+        val params = JobParametersBuilder()
+            .addLong("timestamp", System.currentTimeMillis())
+            .toJobParameters()
+
+        val execution = jobOperator.start(tp4Job, params)
+
         redirect.addFlashAttribute(
-            "errorMessage",
-            "tp4Job → TODO)"
+            "message",
+            "tp4Job → " + execution.getStatus() + " (exécution #" + execution.getId() + ")"
         )
 
         return "redirect:/"
@@ -154,7 +164,11 @@ class WebController(
 
         // JobParameters n'accepte que String / Long / Double / Date & co.
         val params = JobParametersBuilder()
-            .addLong("timestamp", System.currentTimeMillis())
+            .addString("fichierSource", fichierSource)
+            .addString("format", format)
+            .addString("totalTtc", totalTtc.toString())
+            .addDouble("montantMini", montantMini)
+            .addLong("timestamp", System.nanoTime())
             .toJobParameters()
 
         val execution = jobOperator.start(tp6Job, params)
@@ -393,6 +407,39 @@ class WebController(
         val bilan = "${lignes.size} lignes fusionnees (sans doublon) → $TP12_FUSION_OUTPUT"
 
         val texte = "tp12Job → ${execution.status} (exécution #${execution.id}) — $bilan"
+        if (execution.status == BatchStatus.COMPLETED) {
+            redirect.addFlashAttribute("message", texte)
+        } else {
+            redirect.addFlashAttribute("errorMessage", texte)
+        }
+        return "redirect:/"
+    }
+
+    @PostMapping("/jobs/tpfinal")
+    fun tpFinal(
+        @RequestParam(defaultValue = TPFINAL_COMMANDES_CSV) fichierSource: String,
+        redirect: RedirectAttributes
+    ): String {
+
+        // Pas de deleteAll ici : c'est le 1er step du job (tpFinalNettoyageStep) qui vide
+        // la table ET le dossier de sortie. Le batch est autonome, l'IHM ne fait que lancer.
+
+        val params = JobParametersBuilder()
+            .addString("fichierSource", fichierSource)
+            .addLong("timestamp", System.currentTimeMillis())
+            .toJobParameters()
+
+        val execution = jobOperator.start(tpFinalJob, params)
+
+        // Bilan : nombre de rejets traces + apercu du camions.txt genere.
+        val rejets = java.io.File(cheminRejetsTpFinal())
+            .takeIf { it.exists() }?.readLines()?.drop(1)?.count { it.isNotBlank() } ?: 0
+        val camions = java.io.File(TPFINAL_CAMIONS_TXT)
+            .takeIf { it.exists() }?.readLines()?.count { it.isNotBlank() } ?: 0
+        val chemin = execution.stepExecutions.sortedBy { it.id }.joinToString(" → ") { it.stepName }
+        val bilan = "$rejets commande(s) rejetée(s), $camions ville(s) dans camions.txt — chemin : $chemin"
+
+        val texte = "tpFinalJob → ${execution.status} (exécution #${execution.id}) — $bilan"
         if (execution.status == BatchStatus.COMPLETED) {
             redirect.addFlashAttribute("message", texte)
         } else {

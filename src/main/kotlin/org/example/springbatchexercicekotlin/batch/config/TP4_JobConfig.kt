@@ -14,7 +14,6 @@ import org.springframework.batch.infrastructure.item.ItemProcessor
 import org.springframework.batch.infrastructure.item.ItemWriter
 import org.springframework.batch.infrastructure.item.file.FlatFileItemReader
 import org.springframework.batch.infrastructure.item.file.builder.FlatFileItemReaderBuilder
-import org.springframework.batch.infrastructure.repeat.RepeatStatus
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.FileSystemResource
@@ -33,10 +32,8 @@ class TP4_JobConfig {
         FlatFileItemReaderBuilder<VenteCsvDTO>()
             .name("venteReader")
             .resource(FileSystemResource(VENTES_CSV))
-            .linesToSkip(1) // ligne d'en-tete
             .delimited()
-            .delimiter(";")
-            .names("date", "idBoutique", "produit", "montantHt")
+            .names("TODO")
             .targetType(VenteCsvDTO::class.java)
             .build()
 
@@ -71,9 +68,9 @@ class TP4_JobConfig {
             .build()
 
     @Bean
-    fun tp4Job(jobRepository: JobRepository): Job =
+    fun tp4Job(jobRepository: JobRepository, tp4Step : Step): Job =
         JobBuilder("tp4Job", jobRepository)
-            .start { }
+            .start( tp4Step)
             .build()
 }
 
