@@ -8,8 +8,8 @@ interface CommandeRepository : JpaRepository<CommandeEntity, Long> {
 
     /** Les villes presentes en base (une par entree du camions.txt), triees. */
     @Query("SELECT DISTINCT c.city FROM CommandeEntity c ORDER BY c.city")
-    fun findVilles(): List<String>
+    fun findCity(): List<String>
 
     /** Toutes les commandes d'une ville, triees par magasin (pour le fichier chauffeur). */
-    fun findByVilleOrderByMagasin(ville: String): List<CommandeEntity>
+    fun findByCityOrderByShop(ville: String): List<CommandeEntity>
 }
